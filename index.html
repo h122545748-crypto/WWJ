@@ -454,12 +454,12 @@
     }
   }
 
-  function resumeNfcScanWithCooldown(cooldownMs = 3000) {
+  function resumeNfcScanWithCooldown(cooldownMs = 2000) {
     if (autoResetTimer) clearTimeout(autoResetTimer);
     resetAutoResetTimer();
 
     // 管理者模式與換卡模式下，自動冷卻時間改為 1 秒
-    const actualCooldown = (isAdminMode || isReplaceMode) ? 1000 : cooldownMs;
+    const actualCooldown = (isAdminMode || isReplaceMode) ? 500 : cooldownMs;
 
     setTimeout(() => {
       if (isScanning && !ndefController) {
@@ -492,7 +492,7 @@
           if (isReplaceMode) {
             document.getElementById('newCardDisplay').innerText = cardId;
             playSoundSuccess();
-            resumeNfcScanWithCooldown(1000); // 管理者冷卻 1 秒
+            resumeNfcScanWithCooldown(500); // 管理者冷卻 1 秒
             return;
           }
 
@@ -501,7 +501,7 @@
           try {
             const checkRes = await safeFetch({ action: "checkCard", cardId: cardId });
             if (!checkRes) {
-              resumeNfcScanWithCooldown(1000);
+              resumeNfcScanWithCooldown(500);
               return;
             }
 
@@ -553,7 +553,7 @@
             setDisplay("❌ 查詢卡片狀態失敗：" + e.message, "theme-error");
             playSoundError();
           }
-          resumeNfcScanWithCooldown(1000); // 管理者冷卻 1 秒
+          resumeNfcScanWithCooldown(500); // 管理者冷卻 1 秒
           return;
         }
 
@@ -614,7 +614,7 @@
 
     const result = await safeFetch({ action: "deduct", cardId: cardId, isForce: isForce });
     if (!result) {
-      resumeNfcScanWithCooldown(3000);
+      resumeNfcScanWithCooldown(2000);
       return;
     }
 
@@ -684,7 +684,7 @@
       setDisplay(`❌ <b>打卡失敗：</b><br>${result.message}<br><br>💳 卡號：${cardId}`, "theme-error");
     }
 
-    resumeNfcScanWithCooldown(3000);
+    resumeNfcScanWithCooldown(2000);
   }
 
   document.getElementById('btnConfirmYes').addEventListener('click', () => {
