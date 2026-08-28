@@ -101,21 +101,11 @@
     }
 
     @keyframes marquee-border {
-      0% {
-        border-image: linear-gradient(0deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1;
-      }
-      25% {
-        border-image: linear-gradient(90deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1;
-      }
-      50% {
-        border-image: linear-gradient(180deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1;
-      }
-      75% {
-        border-image: linear-gradient(270deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1;
-      }
-      100% {
-        border-image: linear-gradient(360deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1;
-      }
+      0% { border-image: linear-gradient(0deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
+      25% { border-image: linear-gradient(90deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
+      50% { border-image: linear-gradient(180deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
+      75% { border-image: linear-gradient(270deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
+      100% { border-image: linear-gradient(360deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
     }
 
     .theme-success { background-color: #004d20; color: #00ff66; border: 3px solid #00ff66; }
@@ -441,7 +431,6 @@
       confirmBox.style.display = 'none';
       pendingCardId = "";
       if (isScanning) {
-        // 自動重置後返回等待感應的呼吸燈狀態
         setDisplay("📡 NFC 讀取中...<br>請將卡片靠近手機背面", "theme-waiting");
       } else {
         setDisplay("點擊上方按鈕開始感應...", "theme-standby");
@@ -522,13 +511,30 @@
 
               cardStatusBadge.innerText = `⚠️ 既有學員：${checkRes.name}（剩餘 ${checkRes.points} 點，原到期日 ${checkRes.expiryDate || '無'}）`;
               
+              // 組合打卡紀錄與剩餘點數 HTML
+              let logsHtml = "";
+              if (checkRes.logsAfterRecharge && checkRes.logsAfterRecharge.length > 0) {
+                logsHtml = checkRes.logsAfterRecharge.map(log => 
+                  `<div class="history-item">🕒 ${log.time} <span style="color:#00ff66;">(剩 ${log.remainingPoints} 點)</span></div>`
+                ).join('');
+              } else {
+                logsHtml = `<div class="history-item" style="color:#aaa;">儲值後尚無進場打卡紀錄</div>`;
+              }
+
               setDisplay(`
                 <div style="text-align: center;">
-                  姓名：${checkRes.name}<br>
-                  點數：${checkRes.points} 點<br>
+                  姓名：<b>${checkRes.name}</b><br>
+                  點數：<b>${checkRes.points}</b> 點<br>
                   使用期限：${checkRes.expiryDate || '無期限'}
                 </div>
+                <div class="history-box" style="margin-top:15px; text-align:left; max-height:160px; overflow-y:auto;">
+                  <div class="history-title" style="color:#00d2ff;">💰 最近一次儲值時間：</div>
+                  <div class="history-item" style="margin-bottom:8px; font-weight:bold;">${checkRes.lastRechargeTime}</div>
+                  <div class="history-title" style="color:#ffeb3b;">📌 儲值後進場打卡紀錄：</div>
+                  ${logsHtml}
+                </div>
               `, "theme-admin");
+
               playSoundSuccess();
 
             } else {
@@ -565,7 +571,6 @@
     isScanning = true;
     scanBtn.innerText = "停止感應打卡";
     scanBtn.classList.add("scanning");
-    // 開啟感應後顯示呼吸燈
     setDisplay("📡 NFC 讀取中...<br>請將卡片靠近手機背面", "theme-waiting");
 
     await restartNfcListener();
@@ -602,7 +607,6 @@
 
   async function processDeduct(cardId, isForce = false) {
     confirmBox.style.display = 'none';
-    // 讀取成功後，資料處理中顯示黃色跑馬燈（流水燈）
     setDisplay(`💳 掃描卡號：<b>${cardId}</b><br>⏳ <b>資料處理中，請勿重複刷卡...</b>`, "theme-loading");
 
     const result = await safeFetch({ action: "deduct", cardId: cardId, isForce: isForce });
