@@ -27,63 +27,104 @@
       text-align: center;
       position: relative;
     }
-    h2 { font-size: 28px; margin-top: 0; color: #ff007f; margin-bottom: 10px; }
+    h2 { font-size: 26px; margin-top: 0; color: #ff007f; margin-bottom: 10px; }
+    
+    .btn-main {
+      background: linear-gradient(135deg, #007bff, #00d2ff);
+      color: white;
+      border: none;
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 16px;
+      cursor: pointer;
+      width: 100%;
+      margin: 15px 0 10px 0;
+      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-main.scanning {
+      background: linear-gradient(135deg, #dc3545, #ff6b6b);
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+    }
 
-    /* 🟢 今日課程切換區塊樣式 */
-    .today-course-panel {
+    /* 課程選擇區塊樣式 */
+    .course-section {
       background: #282828;
-      border: 2px solid #ff007f;
+      border: 1px solid #444;
       border-radius: 14px;
-      padding: 12px 16px;
+      padding: 12px 14px;
       margin-bottom: 15px;
       text-align: left;
     }
-    .today-course-header {
-      font-size: 16px;
+    .course-section-title {
+      font-size: 14px;
+      color: #ffeb3b;
       font-weight: bold;
-      color: #ff007f;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .today-course-list {
+    .course-list-box {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
+      max-height: 180px;
+      overflow-y: auto;
     }
-    .course-toggle-item {
+    .course-switch-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #1a1a1a;
+      background: #1e1e1e;
       padding: 8px 12px;
       border-radius: 10px;
-      border: 1px solid #444;
+      border: 1px solid #333;
     }
-    .course-toggle-info {
+    .course-info {
       display: flex;
       flex-direction: column;
     }
-    .course-toggle-name {
+    .course-title-text {
       font-size: 15px;
       font-weight: bold;
-      color: #fff;
+      color: #ffffff;
     }
-    .course-toggle-sub {
+    .course-sub-text {
       font-size: 12px;
       color: #aaa;
     }
 
+    /* 滑動開關 (Toggle Switch) 樣式 */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #555; transition: .3s; border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #00e676; }
+    input:checked + .slider:before { transform: translateX(20px); }
+
     .status-display {
-      margin-top: 15px;
-      padding: 25px;
+      margin-top: 10px;
+      padding: 20px;
       border-radius: 16px;
-      font-size: 22px;
+      font-size: 20px;
       font-weight: bold;
-      line-height: 1.6;
+      line-height: 1.5;
       text-align: left;
-      min-height: 200px;
+      min-height: 180px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -91,69 +132,38 @@
     }
 
     .theme-standby { background-color: #2a2a2a; color: #aaa; border: 2px dashed #555; text-align: center; }
-    
     .theme-waiting {
       background-color: #1a2332;
       color: #00d2ff;
       border: 3px solid #00d2ff;
       animation: breathing-glow 2.5s infinite ease-in-out;
     }
-
     @keyframes breathing-glow {
       0% { opacity: 0.5; border-color: rgba(0, 210, 255, 0.4); box-shadow: 0 0 5px rgba(0, 210, 255, 0.2); }
       50% { opacity: 1; border-color: rgba(0, 210, 255, 1); box-shadow: 0 0 20px rgba(0, 210, 255, 0.8); }
       100% { opacity: 0.5; border-color: rgba(0, 210, 255, 0.4); box-shadow: 0 0 5px rgba(0, 210, 255, 0.2); }
     }
-
     .theme-loading {
       background-color: #332b00;
       color: #ffeb3b;
       position: relative;
-      border: 4px solid transparent;
-      border-image: linear-gradient(90deg, #ffcc00, #332b00, #ffcc00, #332b00) 1;
-      animation: marquee-border 1.2s linear infinite;
+      border: 4px solid #ffcc00;
     }
-
-    @keyframes marquee-border {
-      0% { border-image: linear-gradient(0deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
-      25% { border-image: linear-gradient(90deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
-      50% { border-image: linear-gradient(180deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
-      75% { border-image: linear-gradient(270deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
-      100% { border-image: linear-gradient(360deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
-    }
-
     .theme-success { background-color: #004d20; color: #00ff66; border: 3px solid #00ff66; }
     .theme-error { background-color: #5a0000; color: #ff4d4d; border: 3px solid #ff4d4d; }
     .theme-admin { background-color: #4a0072; color: #e040fb; border: 3px solid #e040fb; }
 
-    .highlight-val { font-size: 32px; font-weight: 900; color: #ffffff; text-decoration: underline; }
-
-    .warn-alert {
-      display: inline-block;
-      font-weight: 900;
-      color: #ff3333;
-      text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
-      animation: blink-animation 0.8s infinite alternate;
-      background-color: rgba(255, 0, 0, 0.2);
-      padding: 2px 8px;
-      border-radius: 8px;
-    }
-
-    @keyframes blink-animation {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0.3; transform: scale(1.02); }
-    }
+    .highlight-val { font-size: 28px; font-weight: 900; color: #ffffff; text-decoration: underline; }
 
     .history-box {
-      margin-top: 15px;
-      padding-top: 12px;
+      margin-top: 10px;
+      padding-top: 10px;
       border-top: 1px solid rgba(255, 255, 255, 0.2);
-      font-size: 15px;
+      font-size: 14px;
       color: #e0e0e0;
       font-weight: normal;
     }
-
-    .history-title { font-size: 16px; font-weight: bold; color: #ffeb3b; margin-bottom: 6px; }
+    .history-title { font-size: 15px; font-weight: bold; color: #ffeb3b; margin-bottom: 4px; }
     .history-item { padding: 2px 0; font-family: monospace; }
 
     .confirm-box {
@@ -166,8 +176,8 @@
       text-align: center;
     }
     .confirm-btn-group { display: flex; gap: 12px; margin-top: 15px; }
-    .btn-confirm-yes { flex: 1; background: #28a745; color: white; border: none; padding: 18px; font-size: 22px; font-weight: bold; border-radius: 12px; cursor: pointer; }
-    .btn-confirm-no { flex: 1; background: #dc3545; color: white; border: none; padding: 18px; font-size: 22px; font-weight: bold; border-radius: 12px; cursor: pointer; }
+    .btn-confirm-yes { flex: 1; background: #28a745; color: white; border: none; padding: 15px; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer; }
+    .btn-confirm-no { flex: 1; background: #dc3545; color: white; border: none; padding: 15px; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer; }
     
     .admin-panel {
       display: none;
@@ -178,14 +188,14 @@
       border: 2px solid #e040fb;
       text-align: left;
     }
-    .admin-panel h3 { color: #e040fb; margin-top: 0; font-size: 22px; }
+    .admin-panel h3 { color: #e040fb; margin-top: 0; font-size: 20px; }
     .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 16px; margin-bottom: 5px; color: #ccc; }
+    .form-group label { display: block; font-size: 14px; margin-bottom: 5px; color: #ccc; }
     .form-group input, .form-group select {
-      width: 100%; padding: 12px; font-size: 18px; border-radius: 8px; border: none; background: #333; color: white;
+      width: 100%; padding: 10px; font-size: 16px; border-radius: 8px; border: none; background: #333; color: white;
     }
     .btn-admin-act {
-      background: #e040fb; color: white; border: none; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 8px; width: 100%; margin-top: 10px; cursor: pointer;
+      background: #e040fb; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 8px; width: 100%; margin-top: 10px; cursor: pointer;
     }
     .btn-danger { background: #d32f2f !important; }
     .btn-info { background: #0288d1 !important; }
@@ -194,52 +204,24 @@
     .admin-section { margin-top: 15px; padding-top: 15px; border-top: 1px solid #444; }
 
     .log-list {
-      max-height: 250px;
+      max-height: 200px;
       overflow-y: auto;
       background: #1e1e1e;
       border-radius: 8px;
       padding: 10px;
       margin-top: 10px;
-      font-size: 15px;
+      font-size: 14px;
     }
     .log-item {
-      padding: 8px 0;
+      padding: 6px 0;
       border-bottom: 1px solid #333;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     .btn-refund {
-      background: #ff9800; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer;
+      background: #ff9800; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;
     }
-
-    /* 滑動開關 (Toggle Switch) 樣式 */
-    .switch-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #222;
-      padding: 10px 14px;
-      border-radius: 8px;
-      margin-top: 15px;
-    }
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 24px;
-    }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #555; transition: .3s; border-radius: 24px;
-    }
-    .slider:before {
-      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
-      background-color: white; transition: .3s; border-radius: 50%;
-    }
-    input:checked + .slider { background-color: #ff007f; }
-    input:checked + .slider:before { transform: translateX(20px); }
 
     .idle-warning-box {
       display: none;
@@ -257,859 +239,292 @@
       z-index: 9999;
       text-align: center;
       font-weight: bold;
-      animation: pulse-warn 1s infinite alternate;
-    }
-    @keyframes pulse-warn {
-      0% { transform: translateX(-50%) scale(1); }
-      100% { transform: translateX(-50%) scale(1.03); }
     }
   </style>
 </head>
 <body>
 
-<div id="idleWarningBox" class="idle-warning-box">
-  ⚠️ 檢測到閒置！系統即將於 <span id="idleCountdownSec" style="font-size: 26px; text-decoration: underline;">10</span> 秒後自動退出管理者模式！<br>
-  <span style="font-size: 13px; opacity: 0.9;">(請點擊畫面任意處以繼續使用)</span>
-</div>
-
-<div class="card-container">
-  <h2>&lt;文舞集&gt;簽到</h2>
-
-  <!-- 🟢 今日課程列表與滑動開關區塊 -->
-  <div class="today-course-panel">
-    <div class="today-course-header">
-      <span>📅 今日課程開關 (<span id="currentDayText">載入中</span>)</span>
-    </div>
-    <div id="todayCourseList" class="today-course-list">
-      <div style="color: #aaa; font-size: 13px;">正在獲取今日課程...</div>
-    </div>
+  <div id="idleWarningBox" class="idle-warning-box">
+    ⚠️ 檢測到閒置！系統即將於 <span id="idleCountdownSec" style="font-size: 24px; text-decoration: underline;">10</span> 秒後退出管理者模式！<br>
+    <span style="font-size: 12px; opacity: 0.9;">(點擊畫面任意處即可繼續使用)</span>
   </div>
 
-  <div id="displayWindow" class="status-display theme-waiting">
-    📡 NFC 感應等待中...<br>請將卡片靠近手機背面
-  </div>
+  <div class="card-container">
+    <h2>文舞集 簽到扣點系統</h2>
 
-  <div id="confirmBox" class="confirm-box">
-    <div id="confirmMsg" style="font-size: 20px; color: #ffeb3b; font-weight: bold;"></div>
-    <div class="confirm-btn-group">
-      <button id="btnConfirmYes" class="btn-confirm-yes">是 (再扣 1 點)</button>
-      <button id="btnConfirmNo" class="btn-confirm-no">否 (取消)</button>
-    </div>
-  </div>
-
-  <div id="adminPanel" class="admin-panel">
-    <h3>👑 管理者控制台 (已暫停扣款)</h3>
-    <p style="font-size: 16px; color: #fff; margin-bottom: 5px;">當前感應卡號：<b id="adminTargetCard" style="color:#00d2ff; font-size:20px;">請靠卡...</b></p>
-    <p id="cardStatusBadge" style="font-size: 14px; color: #ffeb3b; font-weight: bold; margin-top: 0;"></p>
-
-    <div class="admin-section">
-      <button class="btn-admin-act btn-info" onclick="fetchRecentLogs()">📋 查詢 1 小時內簽到名單</button>
-      <div id="recentLogsContainer" style="display: none; margin-top: 10px;">
-        <div id="recentLogsList" class="log-list"></div>
+    <div class="course-section">
+      <div class="course-section-title">
+        <span>📅 今日上架課程清單</span>
+        <span id="todayWeekdayStr" style="color:#aaa; font-weight:normal;">載入中...</span>
+      </div>
+      <div id="courseListContainer" class="course-list-box">
+        <div style="color:#888; text-align:center; padding:10px;">正在獲取今日課程...</div>
       </div>
     </div>
 
-    <div class="admin-section">
-      <button class="btn-admin-act btn-warning" onclick="toggleReplaceMode()">🔄 進入卡片遺失換卡模式</button>
+    <button id="btnScan" class="btn-main" onclick="toggleScan()">🚀 點擊啟動感應</button>
+
+    <div id="statusDisplay" class="status-display theme-standby">
+      請點擊上方按鈕開始感應打卡
+    </div>
+
+    <div id="confirmBox" class="confirm-box">
+      <div id="confirmMsg" style="font-size: 20px; font-weight: bold; color: #ffeb3b; line-height: 1.5;"></div>
+      <div class="confirm-btn-group">
+        <button class="btn-confirm-yes" onclick="confirmDeduct(true)">確定扣點</button>
+        <button class="btn-confirm-no" onclick="confirmDeduct(false)">取消</button>
+      </div>
+    </div>
+
+    <div id="adminPanel" class="admin-panel">
+      <h3>⚙️ 管理者功能面板</h3>
+      <p style="color: #bbb; font-size: 14px;">當前卡號：<b id="adminCardId" style="color:#fff;"></b></p>
       
-      <div id="replaceSection" class="replace-box" style="display: none; background: #332200; border: 2px solid #ff9800; padding: 15px; border-radius: 12px; margin-top: 10px;">
-        <h4 style="color:#ff9800; margin-top:0;">💳 遺失換卡模式步驟：</h4>
-        <p style="font-size:14px; color:#ddd; margin: 5px 0;">1. 請將<b>【全新新卡】</b>靠卡感應<br>當前感應新卡號：<b id="newCardDisplay" style="color:#00d2ff;">未讀取</b></p>
-        
-        <div class="form-group" style="margin-top: 10px;">
-          <label>2. 請輸入要換卡的會員姓名：</label>
+      <div class="admin-section">
+        <h4 style="color:#00d2ff; margin:0 0 10px 0;">1. 開立新卡片 / 綁定學員</h4>
+        <div class="form-group">
+          <label>學員姓名：</label>
+          <input type="text" id="regName" placeholder="請輸入姓名">
+        </div>
+        <div class="form-group">
+          <label>卡片類型：</label>
+          <select id="regType">
+            <option value="一般學員">一般學員</option>
+            <option value="VIP學員">VIP學員</option>
+            <option value="管理者">管理者</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>初始點數：</label>
+          <input type="number" id="regPoints" value="10">
+        </div>
+        <div class="form-group">
+          <label>到期日期：</label>
+          <input type="date" id="regExpiry">
+        </div>
+        <button class="btn-admin-act" onclick="submitAddCard()">新增 / 更新卡片</button>
+      </div>
+
+      <div class="admin-section">
+        <h4 style="color:#00ff66; margin:0 0 10px 0;">2. 學員儲值加點</h4>
+        <div class="form-group">
+          <label>增加點數：</label>
+          <input type="number" id="addPointsAmount" placeholder="例如：10">
+        </div>
+        <div class="form-group">
+          <label>新到期日 (留空保持原樣)：</label>
+          <input type="date" id="addExpiryDate">
+        </div>
+        <button class="btn-admin-act btn-info" onclick="submitAddPoints()">確定儲值加點</button>
+      </div>
+
+      <div class="admin-section">
+        <h4 style="color:#ffb74d; margin:0 0 10px 0;">3. 舊卡換新卡 (移轉點數)</h4>
+        <p style="color:#aaa; font-size:12px; margin-top:-5px;">當前感應的卡將做為【新卡】，請選取要移轉的舊卡學員：</p>
+        <div class="form-group">
+          <label>搜尋舊卡學員姓名：</label>
           <div style="display:flex; gap:8px;">
-            <input type="text" id="replaceSearchName" placeholder="輸入姓名...">
-            <button onclick="searchReplaceUser()" style="width:100px; background:#00b0ff; border:none; color:white; border-radius:8px; font-weight:bold;">查詢</button>
+            <input type="text" id="searchOldName" placeholder="輸入姓名">
+            <button style="width:80px; background:#555; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="searchOldUser()">搜尋</button>
           </div>
         </div>
-
-        <div id="replaceUserPreview" style="display:none; background:#222; padding:10px; border-radius:8px; margin-top:10px; font-size:15px;"></div>
-        
-        <button id="btnConfirmReplace" class="btn-admin-act btn-danger" style="display:none; margin-top:10px;" onclick="executeCardReplace()">3. 確定更換（廢除舊卡）</button>
+        <div class="form-group">
+          <select id="selectOldUser">
+            <option value="">-- 請先搜尋學員 --</option>
+          </select>
+        </div>
+        <button class="btn-admin-act btn-warning" onclick="submitReplaceCard()">執行換卡與轉移</button>
       </div>
+
+      <div class="admin-section">
+        <h4 style="color:#ffeb3b; margin:0 0 10px 0;">4. 最近簽到紀錄與辦理退點</h4>
+        <button style="background:#444; color:#fff; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="fetchRecentLogs()">🔄 重新整理紀錄</button>
+        <div id="recentLogsContainer" class="log-list">
+          <div style="color:#888; text-align:center;">點擊上方按鈕獲取紀錄...</div>
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <h4 style="color:#ff4d4d; margin:0 0 10px 0;">5. 危險操作：刪除當前卡片</h4>
+        <div class="switch-container" style="margin-top:0; margin-bottom:10px;">
+          <span style="font-size:14px; color:#ff8888; font-weight:bold;">解鎖刪除按鈕：</span>
+          <label class="switch">
+            <input type="checkbox" id="toggleDeleteUnlock" onchange="toggleDeleteButton()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <button id="btnDeleteCard" class="btn-admin-act btn-danger" style="opacity:0.4; cursor:not-allowed;" disabled onclick="submitDeleteCard()">刪除此卡片</button>
+      </div>
+
+      <button class="btn-admin-act btn-close-admin" onclick="closeAdminPanel()">退出管理者模式</button>
     </div>
-
-    <div id="sectionNewCard" class="admin-section" style="display: none;">
-      <h4>✨ 建立新會員資料</h4>
-      <div class="form-group">
-        <label>使用者姓名：</label>
-        <input type="text" id="newUserName" placeholder="例如：王小明">
-      </div>
-      <div class="form-group">
-        <label>卡片類別：</label>
-        <select id="newCardType">
-          <option value="一般">一般會員</option>
-          <option value="VIP">VIP 會員</option>
-          <option value="體驗">體驗學員</option>
-          <option value="管理者">管理者</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>初始點數 (預設 10 點)：</label>
-        <input type="number" id="newCardPoints" value="10">
-      </div>
-      <div class="form-group">
-        <label>使用期限 (預設今日 +100 天)：</label>
-        <input type="date" id="newCardExpiry">
-      </div>
-      <button class="btn-admin-act" onclick="submitNewCard()">確認開卡 / 建立帳號</button>
-    </div>
-
-    <div id="sectionAddPoints" class="admin-section" style="display: none;">
-      <h4>🎟️ 點數儲值與展延</h4>
-      <div class="form-group">
-        <label>展延到期日 (預設：剩餘點數×10天 + 100天)：</label>
-        <input type="date" id="addPointExpiry">
-      </div>
-      <button class="btn-admin-act" style="background:#00c853; margin-bottom: 8px;" onclick="submitAddPoints(10)">+ 增加 10 點</button>
-      <button class="btn-admin-act" style="background:#00b0ff; margin-bottom: 12px;" onclick="submitAddPoints(12)">+ 增加 12 點</button>
-      
-      <div class="switch-container">
-        <span style="font-size: 14px; color: #ff8a80; font-weight: bold;">解鎖刪除卡片功能：</span>
-        <label class="switch">
-          <input type="checkbox" id="toggleDeleteUnlock" onchange="handleToggleDelete(this)">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <button id="btnDeleteCard" class="btn-admin-act btn-danger" style="display: none; margin-top: 10px;" onclick="submitDeleteCard()">🗑️ 確定刪除此卡片資料</button>
-    </div>
-
-    <button class="btn-admin-act btn-close-admin" onclick="closeAdminPanel()">退出管理者模式 (恢復打卡扣點)</button>
   </div>
-</div>
 
-<script>
-  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzou8bhecGqckgDOeM0dihDKurQlOQ6CURl2vFeZupA8NcTfMoULBWhLpnhMnurXviX/exec";
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwP7gS5W8g4fU2QyKvh87W8a6Z7yP_GAS_URL/exec"; 
 
-  const displayWindow = document.getElementById('displayWindow');
-  const adminPanel = document.getElementById('adminPanel');
-  const adminTargetCard = document.getElementById('adminTargetCard');
-  const cardStatusBadge = document.getElementById('cardStatusBadge');
+    let isScanning = false;
+    let nfcReader = null;
+    let pendingCardId = "";
+    let todayCoursesData = [];
 
-  const confirmBox = document.getElementById('confirmBox');
-  const confirmMsg = document.getElementById('confirmMsg');
+    let isAdminMode = false;
+    let currentScannedCardForAdmin = "";
+    let adminIdleTimer = null;
+    let adminCountdownInterval = null;
+    let idleSecondsLeft = 60;
+    const IDLE_LIMIT = 60;
 
-  const sectionNewCard = document.getElementById('sectionNewCard');
-  const sectionAddPoints = document.getElementById('sectionAddPoints');
-  const replaceSection = document.getElementById('replaceSection');
+    const btnScan = document.getElementById('btnScan');
+    const statusDisplay = document.getElementById('statusDisplay');
+    const confirmBox = document.getElementById('confirmBox');
+    const confirmMsg = document.getElementById('confirmMsg');
+    const adminPanel = document.getElementById('adminPanel');
+    const idleWarningBox = document.getElementById('idleWarningBox');
 
-  const idleWarningBox = document.getElementById('idleWarningBox');
-  const idleCountdownSec = document.getElementById('idleCountdownSec');
+    // 頁面載入後自動獲取今日課程
+    window.onload = function() {
+      fetchTodayCourses();
+    };
 
-  let ndefController = null;
-  let isScanning = true;
-  let isAdminMode = false;
-  let isReplaceMode = false;
-  let currentScannedCardForAdmin = "";
-  let pendingCardId = "";
-  let targetReplaceUser = null;
-  let autoResetTimer = null;
-  let todayCourses = [];
+    // 獲取今日星期與相對應上架課程
+    async function fetchTodayCourses() {
+      const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+      const today = new Date();
+      const currentWeekday = weekdays[today.getDay()];
+      document.getElementById('todayWeekdayStr').innerText = `(${currentWeekday})`;
 
-  let adminIdleTimer = null;
-  let adminCountdownInterval = null;
-  let countdownSeconds = 10;
+      const result = await safeFetch({ action: "getTodayCourses" });
+      const container = document.getElementById('courseListContainer');
+      container.innerHTML = "";
 
-  let audioCtx = null;
-
-  document.addEventListener("DOMContentLoaded", () => {
-    loadTodayCourses();
-    startNfcScan();
-  });
-
-  function getTodayWeekDayStr() {
-    const days = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
-    return days[new Date().getDay()];
-  }
-
-  async function loadTodayCourses() {
-    const dayStr = getTodayWeekDayStr();
-    document.getElementById('currentDayText').innerText = dayStr;
-    const listEl = document.getElementById('todayCourseList');
-
-    try {
-      const res = await fetch(GAS_WEB_APP_URL);
-      const data = await res.json();
-      
-      if (data.status === "success" && data.courses) {
-        // 過濾出包含今天星期幾的課程
-        todayCourses = data.courses.filter(c => c.timeInfo && c.timeInfo.includes(dayStr));
-
-        if (todayCourses.length === 0) {
-          listEl.innerHTML = `<div style="color:#aaa; font-size:13px;">今天 (${dayStr}) 無排定課程</div>`;
-          return;
-        }
-
-        listEl.innerHTML = todayCourses.map((c, idx) => `
-          <div class="course-toggle-item">
-            <div class="course-toggle-info">
-              <span class="course-toggle-name">${c.courseName}</span>
-              <span class="course-toggle-sub">👤 ${c.teacher} | ⏰ ${c.timeInfo}</span>
+      if (result && result.status === "success" && result.courses && result.courses.length > 0) {
+        todayCoursesData = result.courses;
+        result.courses.forEach((c, index) => {
+          const item = document.createElement('div');
+          item.className = 'course-switch-item';
+          item.innerHTML = `
+            <div class="course-info">
+              <span class="course-title-text">${c.courseName}</span>
+              <span class="course-sub-text">師資：${c.teacher} ｜ 時間：${c.timeInfo}</span>
             </div>
             <label class="switch">
-              <input type="checkbox" class="course-switch" data-course="${c.courseName}" data-teacher="${c.teacher}" checked>
+              <input type="checkbox" class="course-toggle-checkbox" data-index="${index}" checked>
               <span class="slider"></span>
             </label>
-          </div>
-        `).join('');
-      } else {
-        listEl.innerHTML = `<div style="color:#ff4d4d; font-size:13px;">無法載入課程清單</div>`;
-      }
-    } catch (e) {
-      listEl.innerHTML = `<div style="color:#ff4d4d; font-size:13px;">載入課程失敗</div>`;
-    }
-  }
-
-  function getSelectedCourses() {
-    const switches = document.querySelectorAll('.course-switch:checked');
-    const selected = [];
-    switches.forEach(sw => {
-      selected.push({
-        courseName: sw.getAttribute('data-course'),
-        teacher: sw.getAttribute('data-teacher')
-      });
-    });
-    return selected;
-  }
-
-  function initAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-  }
-
-  function playSoundSuccess() {
-    initAudio();
-    if (!audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.25);
-  }
-
-  function playSoundError() {
-    initAudio();
-    if (!audioCtx) return;
-    const now = audioCtx.currentTime;
-    const osc1 = audioCtx.createOscillator();
-    const gain1 = audioCtx.createGain();
-    osc1.type = 'sawtooth';
-    osc1.frequency.setValueAtTime(220, now);
-    gain1.gain.setValueAtTime(0.3, now);
-    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-    osc1.connect(gain1);
-    gain1.connect(audioCtx.destination);
-    osc1.start(now);
-    osc1.stop(now + 0.15);
-
-    const osc2 = audioCtx.createOscillator();
-    const gain2 = audioCtx.createGain();
-    osc2.type = 'sawtooth';
-    osc2.frequency.setValueAtTime(180, now + 0.2);
-    gain2.gain.setValueAtTime(0.3, now + 0.2);
-    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-    osc2.connect(gain2);
-    gain2.connect(audioCtx.destination);
-    osc2.start(now + 0.2);
-    osc2.stop(now + 0.4);
-  }
-
-  function resetAdminIdleTimer() {
-    if (!isAdminMode) return;
-    if (adminIdleTimer) clearTimeout(adminIdleTimer);
-    if (adminCountdownInterval) clearInterval(adminCountdownInterval);
-    idleWarningBox.style.display = 'none';
-
-    adminIdleTimer = setTimeout(() => {
-      startIdleCountdown();
-    }, 30000);
-  }
-
-  function startIdleCountdown() {
-    countdownSeconds = 10;
-    idleCountdownSec.innerText = countdownSeconds;
-    idleWarningBox.style.display = 'block';
-    playSoundError();
-
-    adminCountdownInterval = setInterval(() => {
-      countdownSeconds--;
-      idleCountdownSec.innerText = countdownSeconds;
-      playSoundError();
-
-      if (countdownSeconds <= 0) {
-        clearInterval(adminCountdownInterval);
-        idleWarningBox.style.display = 'none';
-        closeAdminPanel();
-        alert("⏱️ 管理者模式已超過 40 秒未操作，系統已自動退出！");
-      }
-    }, 1000);
-  }
-
-  ['click', 'touchstart', 'mousemove', 'keydown', 'scroll'].forEach(evt => {
-    window.addEventListener(evt, () => {
-      if (isAdminMode) resetAdminIdleTimer();
-    }, { passive: true });
-  });
-
-  function calcFutureDate(days) {
-    const d = new Date();
-    d.setDate(d.getDate() + days);
-    const month = '' + (d.getMonth() + 1);
-    const day = '' + d.getDate();
-    const year = d.getFullYear();
-    return [year, month.padStart(2, '0'), day.padStart(2, '0')].join('-');
-  }
-
-  function calcRechargeExpiry(remainingPoints) {
-    const points = Number(remainingPoints) || 0;
-    const totalDays = (points * 10) + 100;
-    return calcFutureDate(totalDays);
-  }
-
-  function setDisplay(htmlContent, themeClass) {
-    displayWindow.className = `status-display ${themeClass}`;
-    displayWindow.innerHTML = htmlContent;
-  }
-
-  function maskName(name) {
-    if (!name) return "";
-    const arr = Array.from(name);
-    if (arr.length > 1) {
-      arr[1] = "♥";
-    }
-    return arr.join("");
-  }
-
-  function resetAutoResetTimer() {
-    if (autoResetTimer) clearTimeout(autoResetTimer);
-    if (isAdminMode) return;
-
-    autoResetTimer = setTimeout(() => {
-      confirmBox.style.display = 'none';
-      pendingCardId = "";
-      setDisplay("📡 NFC 讀取中...<br>請將卡片靠近手機背面", "theme-waiting");
-    }, 30000);
-  }
-
-  function pauseNfcScan() {
-    if (ndefController) {
-      ndefController.abort();
-      ndefController = null;
-    }
-  }
-
-  function resumeNfcScanWithCooldown(cooldownMs = 2000) {
-    if (autoResetTimer) clearTimeout(autoResetTimer);
-    resetAutoResetTimer();
-
-    const actualCooldown = (isAdminMode || isReplaceMode) ? 500 : cooldownMs;
-
-    setTimeout(() => {
-      if (isScanning && !ndefController) {
-        restartNfcListener();
-      }
-    }, actualCooldown);
-  }
-
-  async function restartNfcListener() {
-    try {
-      ndefController = new AbortController();
-      const ndef = new NDEFReader();
-      await ndef.scan({ signal: ndefController.signal });
-
-      ndef.addEventListener("readingerror", () => {
-        pauseNfcScan();
-        setDisplay("❌ 讀取失敗，請重新靠卡一次", "theme-error");
-        playSoundError();
-        resumeNfcScanWithCooldown(3000);
-      });
-
-      ndef.addEventListener("reading", async ({ serialNumber }) => {
-        pauseNfcScan();
-        const cardId = serialNumber.replace(/:/g, '').toUpperCase();
-
-        if (isAdminMode) {
-          resetAdminIdleTimer();
-          currentScannedCardForAdmin = cardId;
-          adminTargetCard.innerText = cardId;
-          
-          document.getElementById('toggleDeleteUnlock').checked = false;
-          document.getElementById('btnDeleteCard').style.display = 'none';
-
-          if (isReplaceMode) {
-            document.getElementById('newCardDisplay').innerText = cardId;
-            playSoundSuccess();
-            resumeNfcScanWithCooldown(500);
-            return;
-          }
-
-          setDisplay("🔍 正在查詢卡片狀態...", "theme-loading");
-
-          try {
-            const checkRes = await safeFetch({ action: "checkCard", cardId: cardId });
-            if (!checkRes) {
-              resumeNfcScanWithCooldown(500);
-              return;
-            }
-
-            if (checkRes.status === "exists") {
-              sectionNewCard.style.display = "none";
-              sectionAddPoints.style.display = "block";
-              
-              const calculatedExpiry = calcRechargeExpiry(checkRes.points);
-              document.getElementById('addPointExpiry').value = calculatedExpiry;
-
-              cardStatusBadge.innerText = `⚠️ 既有學員：${checkRes.name}（剩餘 ${checkRes.points} 點，原到期日 ${checkRes.expiryDate || '無'}）`;
-              
-              let logsHtml = "";
-              if (checkRes.logsAfterRecharge && checkRes.logsAfterRecharge.length > 0) {
-                logsHtml = checkRes.logsAfterRecharge.map(log => 
-                  `<div class="history-item">🕒 ${log.time} <span style="color:#00ff66;">(剩 ${log.remainingPoints} 點)</span></div>`
-                ).join('');
-              } else {
-                logsHtml = `<div class="history-item" style="color:#aaa;">儲值後尚無進場打卡紀錄</div>`;
-              }
-
-              setDisplay(`
-                <div style="text-align: center;">
-                  姓名：<b>${checkRes.name}</b><br>
-                  點數：<b>${checkRes.points}</b> 點<br>
-                  使用期限：${checkRes.expiryDate || '無期限'}
-                </div>
-                <div class="history-box" style="margin-top:15px; text-align:left; max-height:160px; overflow-y:auto;">
-                  <div class="history-title" style="color:#00d2ff;">💰 最近一次儲值/開卡時間：</div>
-                  <div class="history-item" style="margin-bottom:8px; font-weight:bold;">${checkRes.lastRechargeTime}</div>
-                  <div class="history-title" style="color:#ffeb3b;">📌 儲值後進場打卡紀錄：</div>
-                  ${logsHtml}
-                </div>
-              `, "theme-admin");
-
-              playSoundSuccess();
-
-            } else {
-              sectionNewCard.style.display = "block";
-              sectionAddPoints.style.display = "none";
-              document.getElementById('newCardPoints').value = 10;
-              document.getElementById('newCardExpiry').value = calcFutureDate(100);
-              cardStatusBadge.innerText = "✨ 此為全新的空白卡片，可建立新資料";
-              setDisplay(`👑 <b>全新卡片</b><br>卡號：<b>${cardId}</b><br>請於下方面板填寫資料開卡。`, "theme-admin");
-              playSoundSuccess();
-            }
-          } catch (e) {
-            setDisplay("❌ 查詢卡片狀態失敗：" + e.message, "theme-error");
-            playSoundError();
-          }
-          resumeNfcScanWithCooldown(500);
-          return;
-        }
-
-        processDeduct(cardId, false);
-      });
-    } catch (e) {
-      console.error("NFC 自動重啟失敗:", e);
-    }
-  }
-
-  async function startNfcScan() {
-    if (!('NDEFReader' in window)) {
-      setDisplay("⚠️ 瀏覽器不支援 Web NFC！<br>請確認使用 Android 上的 Chrome 瀏覽器", "theme-error");
-      playSoundError();
-      return;
-    }
-
-    isScanning = true;
-    setDisplay("📡 NFC 讀取中...<br>請將卡片靠近手機背面", "theme-waiting");
-    await restartNfcListener();
-  }
-
-  async function safeFetch(payload) {
-    try {
-      const response = await fetch(GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        setDisplay(`⚠️ <b>伺服器回應異常 (${response.status})</b>`, "theme-error");
-        playSoundError();
-        return null;
-      }
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        setDisplay("⚠️ <b>Google 伺服器連線繁忙</b><br>請稍後 3 秒重新靠卡感應。", "theme-error");
-        playSoundError();
-        return null;
-      }
-
-      return await response.json();
-    } catch (err) {
-      setDisplay(`❌ <b>連線失敗：</b><br>請檢查網路連線後重試。`, "theme-error");
-      playSoundError();
-      return null;
-    }
-  }
-
-  async function processDeduct(cardId, isForce = false) {
-    confirmBox.style.display = 'none';
-    
-    // 獲取目前啟動的課程
-    const selectedCourses = getSelectedCourses();
-
-    setDisplay(`💳 掃描卡號：<b>${cardId}</b><br>⏳ <b>資料處理中，請勿重複刷卡...</b>`, "theme-loading");
-
-    const result = await safeFetch({
-      action: "deduct",
-      cardId: cardId,
-      isForce: isForce,
-      targetCourses: selectedCourses
-    });
-
-    if (!result) {
-      resumeNfcScanWithCooldown(2000);
-      return;
-    }
-
-    if (result.status === "success") {
-      playSoundSuccess();
-
-      let pointsDisplay = `<span class="highlight-val">${result.remainingPoints}</span> 次`;
-      if (result.remainingPoints <= 3) {
-        pointsDisplay = `<span class="warn-alert">${result.remainingPoints} 次 ⚠️ 點數即將用完！</span>`;
-      }
-
-      let expiryDisplay = `<span class="highlight-val">${result.expiryDate}</span>`;
-      if (result.expiryDate && result.expiryDate !== "無期限") {
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const expDate = new Date(result.expiryDate);
-        const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
-
-        if (diffDays < 10) {
-          const dayText = diffDays <= 0 ? "已過期！" : `剩 ${diffDays} 天`;
-          expiryDisplay = `<span class="warn-alert">${result.expiryDate} (${dayText})</span>`;
-        }
-      }
-
-      let historyHtml = "";
-      if (result.recent5Logs && result.recent5Logs.length > 0) {
-        const listItems = result.recent5Logs.map(log => `<div class="history-item">🕒 ${log}</div>`).join('');
-        historyHtml = `
-          <div class="history-box">
-            <div class="history-title">📅 最近 5 次打卡紀錄：</div>
-            ${listItems}
-          </div>
-        `;
-      }
-
-      const maskedName = maskName(result.name);
-      setDisplay(`
-        <div style="font-size:28px; color:#00ff66; text-align:center; margin-bottom:10px;">🎉 歡迎報到</div>
-        <div style="font-size:36px; text-align:center; margin-bottom:15px; color:#fff;">${maskedName}</div>
-        🎟️ 剩餘點數：${pointsDisplay}<br>
-        📅 使用期限：${expiryDisplay}
-        ${historyHtml}
-      `, "theme-success");
-
-    } else if (result.status === "need_confirm") {
-      playSoundError();
-      pendingCardId = cardId;
-      confirmMsg.innerHTML = result.message;
-      confirmBox.style.display = 'block';
-      setDisplay(`⚠️ <b>請於下方選擇是否繼續扣點</b>`, "theme-admin");
-
-    } else if (result.status === "admin") {
-      playSoundSuccess();
-      isAdminMode = true;
-      resetAdminIdleTimer();
-
-      if (autoResetTimer) clearTimeout(autoResetTimer);
-      currentScannedCardForAdmin = "";
-      adminTargetCard.innerText = "請靠卡...";
-      cardStatusBadge.innerText = "";
-      sectionNewCard.style.display = "none";
-      sectionAddPoints.style.display = "none";
-
-      setDisplay(`👑 <b>管理者解鎖！</b><br>已進入管理者模式，<b>簽到扣款已暫停</b>。<br>請感應欲處理的會員卡號。`, "theme-admin");
-      adminPanel.style.display = 'block';
-
-    } else {
-      playSoundError();
-      setDisplay(`❌ <b>打卡失敗：</b><br>${result.message}<br><br>💳 卡號：${cardId}`, "theme-error");
-    }
-
-    resumeNfcScanWithCooldown(2000);
-  }
-
-  document.getElementById('btnConfirmYes').addEventListener('click', () => {
-    if (pendingCardId) {
-      processDeduct(pendingCardId, true);
-      pendingCardId = "";
-    }
-  });
-
-  document.getElementById('btnConfirmNo').addEventListener('click', () => {
-    pendingCardId = "";
-    confirmBox.style.display = 'none';
-    setDisplay("已取消重複扣點。請重新靠卡打卡。", "theme-standby");
-    resumeNfcScanWithCooldown(1000);
-  });
-
-  function toggleReplaceMode() {
-    isReplaceMode = !isReplaceMode;
-    if (isReplaceMode) {
-      replaceSection.style.display = 'block';
-      sectionNewCard.style.display = 'none';
-      sectionAddPoints.style.display = 'none';
-      setDisplay("🔄 <b>已切換至卡片遺失換卡模式</b><br>請先感應「全新卡片」，再輸入舊學員姓名搜尋。", "theme-admin");
-    } else {
-      replaceSection.style.display = 'none';
-      targetReplaceUser = null;
-      setDisplay("已離開換卡模式。", "theme-admin");
-    }
-  }
-
-  async function searchReplaceUser() {
-    const name = document.getElementById('replaceSearchName').value.trim();
-    if (!name) return alert("請輸入會員姓名！");
-
-    const result = await safeFetch({ action: "searchUserByName", name: name });
-    const previewEl = document.getElementById('replaceUserPreview');
-    const confirmBtn = document.getElementById('btnConfirmReplace');
-
-    if (result && result.status === "found") {
-      playSoundSuccess();
-      targetReplaceUser = result.cardData;
-      previewEl.style.display = "block";
-      previewEl.innerHTML = `
-        <b style="color:#00ff66;">✅ 找到學員資料：</b><br>
-        • 姓名：<b>${targetReplaceUser.name}</b><br>
-        • 剩餘點數：<b>${targetReplaceUser.points}</b> 點<br>
-        • 舊卡號：<span style="color:#ff4d4d; text-decoration:line-through;">${targetReplaceUser.oldCardId}</span>
-      `;
-      confirmBtn.style.display = "block";
-    } else {
-      playSoundError();
-      targetReplaceUser = null;
-      previewEl.style.display = "block";
-      previewEl.innerHTML = `<b style="color:#ff4d4d;">❌ 查無此會員名字！</b>`;
-      confirmBtn.style.display = "none";
-    }
-  }
-
-  async function executeCardReplace() {
-    const newCardId = document.getElementById('newCardDisplay').innerText;
-    if (newCardId === "未讀取" || !newCardId) return alert("請先感應全新新卡片！");
-    if (!targetReplaceUser) return alert("請先搜尋並確認會員資料！");
-
-    if (!confirm(`⚠️ 確認更換？\n\n確定將【${targetReplaceUser.name}】的卡號由 ${targetReplaceUser.oldCardId} 更換為 ${newCardId} 嗎？\n舊卡號將會廢除！`)) {
-      return;
-    }
-
-    setDisplay("⏳ 正在辦理換卡與廢除舊卡...", "theme-loading");
-
-    const result = await safeFetch({
-      action: "replaceCard",
-      oldCardId: targetReplaceUser.oldCardId,
-      newCardId: newCardId,
-      name: targetReplaceUser.name
-    });
-
-    if (result && result.status === "success") {
-      playSoundSuccess();
-      alert(result.message);
-      toggleReplaceMode();
-      document.getElementById('newCardDisplay').innerText = "未讀取";
-      document.getElementById('replaceSearchName').value = "";
-      document.getElementById('replaceUserPreview').style.display = "none";
-      setDisplay(`🎉 <b>換卡成功！</b><br>會員：<b>${targetReplaceUser.name}</b><br>新卡號已被綁定，舊卡已註銷。`, "theme-admin");
-    } else {
-      playSoundError();
-      alert(result ? result.message : "換卡失敗");
-    }
-  }
-
-  async function submitNewCard() {
-    const name = document.getElementById('newUserName').value.trim();
-    const cardType = document.getElementById('newCardType').value;
-    const points = document.getElementById('newCardPoints').value;
-    const expiryDate = document.getElementById('newCardExpiry').value;
-
-    if (!currentScannedCardForAdmin) return alert("請先感應要開卡的 NFC 卡片！");
-    if (!name) return alert("請輸入使用者姓名！");
-
-    setDisplay("⏳ 正在建立新卡片資料...", "theme-loading");
-
-    const result = await safeFetch({
-      action: "addCard",
-      cardId: currentScannedCardForAdmin,
-      name: name,
-      cardType: cardType,
-      points: points,
-      expiryDate: expiryDate
-    });
-
-    if (result) {
-      alert(result.message);
-      if(result.status === "success") {
-        playSoundSuccess();
-        document.getElementById('newUserName').value = "";
-        adminTargetCard.innerText = "請感應下張卡片...";
-        cardStatusBadge.innerText = "";
-        sectionNewCard.style.display = "none";
-        setDisplay(`👑 <b>卡片建立成功！</b><br>可繼續感應下一張卡片。`, "theme-admin");
-      } else {
-        playSoundError();
-      }
-    }
-  }
-
-  async function submitAddPoints(amount) {
-    if (!currentScannedCardForAdmin) return alert("請先感應要加點的會員卡片！");
-
-    const expiryDate = document.getElementById('addPointExpiry').value;
-    if (!confirm(`確定要為卡號 ${currentScannedCardForAdmin} 增加 ${amount} 點，並設定到期日為 ${expiryDate} 嗎？`)) return;
-
-    setDisplay("⏳ 點數儲值中...", "theme-loading");
-
-    const result = await safeFetch({
-      action: "addPoints",
-      cardId: currentScannedCardForAdmin,
-      addPointsAmount: amount,
-      expiryDate: expiryDate
-    });
-
-    if (result) {
-      alert(result.message);
-      if(result.status === "success") {
-        playSoundSuccess();
-        adminTargetCard.innerText = "請感應下張卡片...";
-        cardStatusBadge.innerText = "";
-        sectionAddPoints.style.display = "none";
-        setDisplay(`👑 <b>加點成功！</b><br>可繼續感應下一張卡片。`, "theme-admin");
-      } else {
-        playSoundError();
-      }
-    }
-  }
-
-  function handleToggleDelete(checkbox) {
-    const btnDelete = document.getElementById('btnDeleteCard');
-    btnDelete.style.display = checkbox.checked ? 'block' : 'none';
-  }
-
-  async function submitDeleteCard() {
-    if (!currentScannedCardForAdmin) return alert("請先感應要刪除的卡片！");
-    if (!confirm(`⚠️ 確定要刪除卡號 ${currentScannedCardForAdmin} 的所有資料嗎？此操作無法復原！`)) return;
-
-    setDisplay("⏳ 正在刪除卡片...", "theme-loading");
-
-    const result = await safeFetch({
-      action: "deleteCard",
-      cardId: currentScannedCardForAdmin
-    });
-
-    if (result) {
-      alert(result.message);
-      if (result.status === "success") {
-        playSoundSuccess();
-        document.getElementById('toggleDeleteUnlock').checked = false;
-        document.getElementById('btnDeleteCard').style.display = 'none';
-        adminTargetCard.innerText = "請感應下張卡片...";
-        cardStatusBadge.innerText = "";
-        sectionAddPoints.style.display = "none";
-        setDisplay(`👑 <b>卡片已成功刪除！</b><br>可繼續感應其他卡片。`, "theme-admin");
-      } else {
-        playSoundError();
-      }
-    }
-  }
-
-  async function fetchRecentLogs() {
-    const container = document.getElementById('recentLogsContainer');
-    const listEl = document.getElementById('recentLogsList');
-    
-    listEl.innerHTML = "載入中...";
-    container.style.display = "block";
-
-    const result = await safeFetch({ action: "getRecentLogs" });
-    if (result && result.status === "success") {
-      playSoundSuccess();
-      if (result.logs.length === 0) {
-        listEl.innerHTML = "<div style='color:#aaa; text-align:center;'>過去 1 小時內無學員簽到紀錄</div>";
-      } else {
-        listEl.innerHTML = result.logs.map(log => {
-          const isCancelled = log.note.includes("已取消");
-          return `
-            <div class="log-item">
-              <div>
-                <span>⏰ ${log.time} - <b>${log.name}</b></span>
-                <div style="font-size:12px; color:${isCancelled ? '#ff4d4d' : '#888'};">${log.note || '已簽到'}</div>
-              </div>
-              <div>
-                ${isCancelled ? '<span style="color:#aaa; font-size:12px;">(已退點)</span>' : 
-                  `<button class="btn-refund" onclick="cancelCheckIn('${log.cardId}', '${log.name}', '${log.fullTime}')">↩️ 取消簽到退點</button>`
-                }
-              </div>
-            </div>
           `;
-        }).join('');
+          container.appendChild(item);
+        });
+      } else {
+        container.innerHTML = `<div style="color:#aaa; text-align:center; padding:10px;">今天（${currentWeekday}）無排定上架課程</div>`;
       }
-    } else {
-      playSoundError();
     }
-  }
 
-  async function cancelCheckIn(cardId, name, logTimeStr) {
-    if (!confirm(`確定要幫學員【${name}】取消於 ${logTimeStr} 的簽到，並退回 1 點嗎？`)) return;
-
-    setDisplay("⏳ 正在辦理取消簽到退點...", "theme-loading");
-
-    const result = await safeFetch({
-      action: "cancelCheckIn",
-      cardId: cardId,
-      name: name,
-      logTimeStr: logTimeStr
-    });
-
-    if (result && result.status === "success") {
-      playSoundSuccess();
-      alert(result.message);
-      fetchRecentLogs();
-      setDisplay(`🎉 <b>已成功取消簽到！</b><br>學員：<b>${name}</b><br>已退回 1 點，目前剩餘：<b>${result.newPoints}</b> 點。`, "theme-admin");
-    } else {
-      playSoundError();
-      alert(result ? result.message : "取消簽到失敗");
+    // 取得當前勾選開啟的課程清單
+    function getSelectedCourses() {
+      const checkboxes = document.querySelectorAll('.course-toggle-checkbox');
+      const selected = [];
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          const idx = parseInt(cb.getAttribute('data-index'), 10);
+          if (todayCoursesData[idx]) {
+            selected.push(todayCoursesData[idx]);
+          }
+        }
+      });
+      return selected;
     }
-  }
 
-  function closeAdminPanel() {
-    isAdminMode = false;
-    isReplaceMode = false;
-    currentScannedCardForAdmin = "";
-    
-    if (adminIdleTimer) clearTimeout(adminIdleTimer);
-    if (adminCountdownInterval) clearInterval(adminCountdownInterval);
-    idleWarningBox.style.display = 'none';
+    // 重設閒置計時器
+    function resetAdminIdleTimer() {
+      if (!isAdminMode) return;
+      idleSecondsLeft = IDLE_LIMIT;
+      idleWarningBox.style.display = 'none';
 
-    document.getElementById('toggleDeleteUnlock').checked = false;
-    document.getElementById('btnDeleteCard').style.display = 'none';
+      if (adminIdleTimer) clearTimeout(adminIdleTimer);
+      if (adminCountdownInterval) clearInterval(adminCountdownInterval);
 
-    adminPanel.style.display = 'none';
-    replaceSection.style.display = 'none';
-    document.getElementById('recentLogsContainer').style.display = 'none';
-    setDisplay("已退出管理者模式，恢復簽到打卡系統。", "theme-waiting");
-    resumeNfcScanWithCooldown(1000);
-  }
-</script>
+      adminCountdownInterval = setInterval(() => {
+        idleSecondsLeft--;
+        if (idleSecondsLeft <= 10 && idleSecondsLeft > 0) {
+          idleWarningBox.style.display = 'block';
+          document.getElementById('idleCountdownSec').innerText = idleSecondsLeft;
+        } else if (idleSecondsLeft <= 0) {
+          closeAdminPanel();
+          setDisplay("⏰ 閒置超時，已自動退出管理者模式。", "theme-standby");
+        }
+      }, 1000);
+    }
 
-</body>
-</html>
+    document.addEventListener('click', () => { if (isAdminMode) resetAdminIdleTimer(); });
+    document.addEventListener('touchstart', () => { if (isAdminMode) resetAdminIdleTimer(); });
+
+    function setDisplay(htmlContent, themeClass) {
+      statusDisplay.className = "status-display " + themeClass;
+      statusDisplay.innerHTML = htmlContent;
+    }
+
+    function playSoundSuccess() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        osc.start(); osc.stop(ctx.currentTime + 0.4);
+      } catch (e) {}
+    }
+
+    function playSoundError() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, ctx.currentTime);
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        osc.start(); osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    function playSoundAdmin() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        osc.start(); osc.stop(ctx.currentTime + 0.35);
+      } catch (e) {}
+    }
+
+    async function toggleScan() {
+      if (!isScanning) {
+        startScan();
+      } else {
+        stopScan();
+      }
+    }
+
+    async function startScan() {
+      if (!('NDEFReader' in window)) {
+        setDisplay("❌ 您的裝置或瀏覽器不支援 Web NFC！<br>請使用 Android Chrome 瀏覽器並開啟 NFC 功能。", "theme-error");
+        playSoundError();
+        return;
+      }
+      try {
+        nfcReader = new NDEFReader();
+        await nfcReader.scan();
+        isScanning = true;
+        btnScan.innerText = "🛑 停止感應打卡";
+        btnScan.classList.add('scanning');
+        confirmBox.style.display = 'none';
+        
+        setDisplay("📡 <b>NFC 感應
