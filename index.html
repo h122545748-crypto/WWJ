@@ -25,6 +25,7 @@
       max-width: 500px;
       width: 100%;
       text-align: center;
+      position: relative;
     }
     h2 { font-size: 28px; margin-top: 0; color: #ff007f; }
     
@@ -64,7 +65,6 @@
 
     .theme-standby { background-color: #2a2a2a; color: #aaa; border: 2px dashed #555; text-align: center; }
     
-    /* 1. 等待 NFC 感應：藍色呼吸燈效果 */
     .theme-waiting {
       background-color: #1a2332;
       color: #00d2ff;
@@ -73,24 +73,11 @@
     }
 
     @keyframes breathing-glow {
-      0% {
-        opacity: 0.5;
-        border-color: rgba(0, 210, 255, 0.4);
-        box-shadow: 0 0 5px rgba(0, 210, 255, 0.2);
-      }
-      50% {
-        opacity: 1;
-        border-color: rgba(0, 210, 255, 1);
-        box-shadow: 0 0 20px rgba(0, 210, 255, 0.8);
-      }
-      100% {
-        opacity: 0.5;
-        border-color: rgba(0, 210, 255, 0.4);
-        box-shadow: 0 0 5px rgba(0, 210, 255, 0.2);
-      }
+      0% { opacity: 0.5; border-color: rgba(0, 210, 255, 0.4); box-shadow: 0 0 5px rgba(0, 210, 255, 0.2); }
+      50% { opacity: 1; border-color: rgba(0, 210, 255, 1); box-shadow: 0 0 20px rgba(0, 210, 255, 0.8); }
+      100% { opacity: 0.5; border-color: rgba(0, 210, 255, 0.4); box-shadow: 0 0 5px rgba(0, 210, 255, 0.2); }
     }
 
-    /* 2. 資料處理中：黃色流水燈 (跑馬燈) 邊框效果 */
     .theme-loading {
       background-color: #332b00;
       color: #ffeb3b;
@@ -114,7 +101,6 @@
 
     .highlight-val { font-size: 32px; font-weight: 900; color: #ffffff; text-decoration: underline; }
 
-    /* 高亮閃爍警示 */
     .warn-alert {
       display: inline-block;
       font-weight: 900;
@@ -140,17 +126,8 @@
       font-weight: normal;
     }
 
-    .history-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #ffeb3b;
-      margin-bottom: 6px;
-    }
-
-    .history-item {
-      padding: 2px 0;
-      font-family: monospace;
-    }
+    .history-title { font-size: 16px; font-weight: bold; color: #ffeb3b; margin-bottom: 6px; }
+    .history-item { padding: 2px 0; font-family: monospace; }
 
     .confirm-box {
       display: none;
@@ -161,17 +138,9 @@
       margin-top: 15px;
       text-align: center;
     }
-    .confirm-btn-group {
-      display: flex;
-      gap: 12px;
-      margin-top: 15px;
-    }
-    .btn-confirm-yes {
-      flex: 1; background: #28a745; color: white; border: none; padding: 18px; font-size: 22px; font-weight: bold; border-radius: 12px; cursor: pointer;
-    }
-    .btn-confirm-no {
-      flex: 1; background: #dc3545; color: white; border: none; padding: 18px; font-size: 22px; font-weight: bold; border-radius: 12px; cursor: pointer;
-    }
+    .confirm-btn-group { display: flex; gap: 12px; margin-top: 15px; }
+    .btn-confirm-yes { flex: 1; background: #28a745; color: white; border: none; padding: 18px; font-size: 22px; font-weight: bold; border-radius: 12px; cursor: pointer; }
+    .btn-confirm-no { flex: 1; background: #dc3545; color: white; border: none; padding: 18px; font-size: 22px; font-weight: bold; border-radius: 12px; cursor: pointer; }
     
     .admin-panel {
       display: none;
@@ -198,7 +167,7 @@
     .admin-section { margin-top: 15px; padding-top: 15px; border-top: 1px solid #444; }
 
     .log-list {
-      max-height: 200px;
+      max-height: 250px;
       overflow-y: auto;
       background: #1e1e1e;
       border-radius: 8px;
@@ -207,21 +176,76 @@
       font-size: 15px;
     }
     .log-item {
-      padding: 6px 0;
+      padding: 8px 0;
       border-bottom: 1px solid #333;
       display: flex;
       justify-content: space-between;
+      align-items: center;
     }
-    .replace-box {
-      background: #332200;
-      border: 2px solid #ff9800;
+    .btn-refund {
+      background: #ff9800; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer;
+    }
+
+    /* 滑動開關 (Toggle Switch) 樣式 */
+    .switch-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #222;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 26px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #555; transition: .3s; border-radius: 26px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
+      background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #d32f2f; }
+    input:checked + .slider:before { transform: translateX(24px); }
+
+    /* 倒數警訊彈窗 */
+    .idle-warning-box {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 460px;
+      background: #d32f2f;
+      color: white;
       padding: 15px;
       border-radius: 12px;
-      margin-top: 10px;
+      box-shadow: 0 5px 20px rgba(255,0,0,0.6);
+      z-index: 9999;
+      text-align: center;
+      font-weight: bold;
+      animation: pulse-warn 1s infinite alternate;
+    }
+    @keyframes pulse-warn {
+      0% { transform: translateX(-50%) scale(1); }
+      100% { transform: translateX(-50%) scale(1.03); }
     }
   </style>
 </head>
 <body>
+
+<!-- 管理者無操作倒數警示彈窗 -->
+<div id="idleWarningBox" class="idle-warning-box">
+  ⚠️ 檢測到閒置！系統即將於 <span id="idleCountdownSec" style="font-size: 26px; text-decoration: underline;">10</span> 秒後自動退出管理者模式！<br>
+  <span style="font-size: 13px; opacity: 0.9;">(請點擊畫面任意處以繼續使用)</span>
+</div>
 
 <div class="card-container">
   <h2>&lt;文舞集&gt;簽到</h2>
@@ -246,7 +270,7 @@
     <p style="font-size: 16px; color: #fff; margin-bottom: 5px;">當前感應卡號：<b id="adminTargetCard" style="color:#00d2ff; font-size:20px;">請靠卡...</b></p>
     <p id="cardStatusBadge" style="font-size: 14px; color: #ffeb3b; font-weight: bold; margin-top: 0;"></p>
 
-    <!-- 區塊：檢視一小時打卡名單 -->
+    <!-- 區塊：檢視一小時打卡名單 & 取消簽到 -->
     <div class="admin-section">
       <button class="btn-admin-act btn-info" onclick="fetchRecentLogs()">📋 查詢 1 小時內簽到名單</button>
       <div id="recentLogsContainer" style="display: none; margin-top: 10px;">
@@ -258,7 +282,7 @@
     <div class="admin-section">
       <button class="btn-admin-act btn-warning" onclick="toggleReplaceMode()">🔄 進入卡片遺失換卡模式</button>
       
-      <div id="replaceSection" class="replace-box" style="display: none;">
+      <div id="replaceSection" class="replace-box" style="display: none; background: #332200; border: 2px solid #ff9800; padding: 15px; border-radius: 12px; margin-top: 10px;">
         <h4 style="color:#ff9800; margin-top:0;">💳 遺失換卡模式步驟：</h4>
         <p style="font-size:14px; color:#ddd; margin: 5px 0;">1. 請將<b>【全新新卡】</b>靠卡感應<br>當前感應新卡號：<b id="newCardDisplay" style="color:#00d2ff;">未讀取</b></p>
         
@@ -303,7 +327,7 @@
       <button class="btn-admin-act" onclick="submitNewCard()">確認開卡 / 建立帳號</button>
     </div>
 
-    <!-- 區塊 B：點數儲值與展延 + 刪除卡片 -->
+    <!-- 區塊 B：點數儲值與展延 + 防誤觸刪除卡片 -->
     <div id="sectionAddPoints" class="admin-section" style="display: none;">
       <h4>🎟️ 點數儲值與展延</h4>
       <div class="form-group">
@@ -313,7 +337,16 @@
       <button class="btn-admin-act" style="background:#00c853; margin-bottom: 8px;" onclick="submitAddPoints(10)">+ 增加 10 點</button>
       <button class="btn-admin-act" style="background:#00b0ff; margin-bottom: 12px;" onclick="submitAddPoints(12)">+ 增加 12 點</button>
       
-      <button class="btn-admin-act btn-danger" onclick="submitDeleteCard()">🗑️ 刪除此卡片資料</button>
+      <!-- 安全防誤觸滑動開關 -->
+      <div class="switch-container">
+        <span style="font-size: 14px; color: #ff8a80; font-weight: bold;">解鎖刪除卡片功能：</span>
+        <label class="switch">
+          <input type="checkbox" id="toggleDeleteUnlock" onchange="handleToggleDelete(this)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <button id="btnDeleteCard" class="btn-admin-act btn-danger" style="display: none; margin-top: 10px;" onclick="submitDeleteCard()">🗑️ 確定刪除此卡片資料</button>
     </div>
 
     <button class="btn-admin-act btn-close-admin" onclick="closeAdminPanel()">退出管理者模式 (恢復打卡扣點)</button>
@@ -336,6 +369,9 @@
   const sectionAddPoints = document.getElementById('sectionAddPoints');
   const replaceSection = document.getElementById('replaceSection');
 
+  const idleWarningBox = document.getElementById('idleWarningBox');
+  const idleCountdownSec = document.getElementById('idleCountdownSec');
+
   let ndefController = null;
   let isScanning = false;
   let isAdminMode = false;
@@ -344,6 +380,11 @@
   let pendingCardId = "";
   let targetReplaceUser = null;
   let autoResetTimer = null;
+
+  // 管理者閒置監控變數 (30秒未操作倒數10秒)
+  let adminIdleTimer = null;
+  let adminCountdownInterval = null;
+  let countdownSeconds = 10;
 
   let audioCtx = null;
 
@@ -393,6 +434,48 @@
     osc2.start(now + 0.2);
     osc2.stop(now + 0.4);
   }
+
+  // 管理者 30 秒防呆閒置倒數邏輯
+  function resetAdminIdleTimer() {
+    if (!isAdminMode) return;
+
+    // 清除舊定時器與倒數
+    if (adminIdleTimer) clearTimeout(adminIdleTimer);
+    if (adminCountdownInterval) clearInterval(adminCountdownInterval);
+    idleWarningBox.style.display = 'none';
+
+    // 設定 30 秒無操作觸發警訊
+    adminIdleTimer = setTimeout(() => {
+      startIdleCountdown();
+    }, 30000);
+  }
+
+  function startIdleCountdown() {
+    countdownSeconds = 10;
+    idleCountdownSec.innerText = countdownSeconds;
+    idleWarningBox.style.display = 'block';
+    playSoundError();
+
+    adminCountdownInterval = setInterval(() => {
+      countdownSeconds--;
+      idleCountdownSec.innerText = countdownSeconds;
+      playSoundError();
+
+      if (countdownSeconds <= 0) {
+        clearInterval(adminCountdownInterval);
+        idleWarningBox.style.display = 'none';
+        closeAdminPanel(); // 自動安全退出
+        alert("⏱️ 管理者模式已超過 40 秒未操作，系統已自動退出！");
+      }
+    }, 1000);
+  }
+
+  // 監聽全域操作以重置閒置計時
+  ['click', 'touchstart', 'mousemove', 'keydown', 'scroll'].forEach(evt => {
+    window.addEventListener(evt, () => {
+      if (isAdminMode) resetAdminIdleTimer();
+    }, { passive: true });
+  });
 
   function calcFutureDate(days) {
     const d = new Date();
@@ -458,7 +541,6 @@
     if (autoResetTimer) clearTimeout(autoResetTimer);
     resetAutoResetTimer();
 
-    // 管理者模式與換卡模式下，自動冷卻時間改為 1 秒
     const actualCooldown = (isAdminMode || isReplaceMode) ? 500 : cooldownMs;
 
     setTimeout(() => {
@@ -486,13 +568,18 @@
         const cardId = serialNumber.replace(/:/g, '').toUpperCase();
 
         if (isAdminMode) {
+          resetAdminIdleTimer();
           currentScannedCardForAdmin = cardId;
           adminTargetCard.innerText = cardId;
+          
+          // 重置刪除按鈕鎖定
+          document.getElementById('toggleDeleteUnlock').checked = false;
+          document.getElementById('btnDeleteCard').style.display = 'none';
 
           if (isReplaceMode) {
             document.getElementById('newCardDisplay').innerText = cardId;
             playSoundSuccess();
-            resumeNfcScanWithCooldown(500); // 管理者冷卻 1 秒
+            resumeNfcScanWithCooldown(500);
             return;
           }
 
@@ -514,7 +601,6 @@
 
               cardStatusBadge.innerText = `⚠️ 既有學員：${checkRes.name}（剩餘 ${checkRes.points} 點，原到期日 ${checkRes.expiryDate || '無'}）`;
               
-              // 組合打卡紀錄與當時進場剩餘點數 HTML
               let logsHtml = "";
               if (checkRes.logsAfterRecharge && checkRes.logsAfterRecharge.length > 0) {
                 logsHtml = checkRes.logsAfterRecharge.map(log => 
@@ -553,7 +639,7 @@
             setDisplay("❌ 查詢卡片狀態失敗：" + e.message, "theme-error");
             playSoundError();
           }
-          resumeNfcScanWithCooldown(500); // 管理者冷卻 1 秒
+          resumeNfcScanWithCooldown(500);
           return;
         }
 
@@ -669,6 +755,8 @@
     } else if (result.status === "admin") {
       playSoundSuccess();
       isAdminMode = true;
+      resetAdminIdleTimer(); // 啟動管理者閒置倒數
+
       if (autoResetTimer) clearTimeout(autoResetTimer);
       currentScannedCardForAdmin = "";
       adminTargetCard.innerText = "請靠卡...";
@@ -850,6 +938,12 @@
     }
   }
 
+  // 解鎖刪除卡片按鈕之滑動開關事件
+  function handleToggleDelete(checkbox) {
+    const btnDelete = document.getElementById('btnDeleteCard');
+    btnDelete.style.display = checkbox.checked ? 'block' : 'none';
+  }
+
   async function submitDeleteCard() {
     if (!currentScannedCardForAdmin) return alert("請先感應要刪除的卡片！");
     if (!confirm(`⚠️ 確定要刪除卡號 ${currentScannedCardForAdmin} 的所有資料嗎？此操作無法復原！`)) return;
@@ -865,6 +959,8 @@
       alert(result.message);
       if (result.status === "success") {
         playSoundSuccess();
+        document.getElementById('toggleDeleteUnlock').checked = false;
+        document.getElementById('btnDeleteCard').style.display = 'none';
         adminTargetCard.innerText = "請感應下張卡片...";
         cardStatusBadge.innerText = "";
         sectionAddPoints.style.display = "none";
@@ -875,6 +971,7 @@
     }
   }
 
+  // 取得 1 小時內打卡紀錄 (帶取消簽到按鈕)
   async function fetchRecentLogs() {
     const container = document.getElementById('recentLogsContainer');
     const listEl = document.getElementById('recentLogsList');
@@ -888,15 +985,49 @@
       if (result.logs.length === 0) {
         listEl.innerHTML = "<div style='color:#aaa; text-align:center;'>過去 1 小時內無學員簽到紀錄</div>";
       } else {
-        listEl.innerHTML = result.logs.map(log => `
-          <div class="log-item">
-            <span>⏰ ${log.time} - <b>${log.name}</b></span>
-            <span style="color:#00ff66;">(剩 ${log.points} 點)</span>
-          </div>
-        `).join('');
+        listEl.innerHTML = result.logs.map(log => {
+          const isCancelled = log.note.includes("已取消");
+          return `
+            <div class="log-item">
+              <div>
+                <span>⏰ ${log.time} - <b>${log.name}</b></span>
+                <div style="font-size:12px; color:${isCancelled ? '#ff4d4d' : '#888'};">${log.note || '已簽到'}</div>
+              </div>
+              <div>
+                ${isCancelled ? '<span style="color:#aaa; font-size:12px;">(已退點)</span>' : 
+                  `<button class="btn-refund" onclick="cancelCheckIn('${log.cardId}', '${log.name}', '${log.fullTime}')">↩️ 取消簽到退點</button>`
+                }
+              </div>
+            </div>
+          `;
+        }).join('');
       }
     } else {
       playSoundError();
+    }
+  }
+
+  // 執行取消簽到並退點
+  async function cancelCheckIn(cardId, name, logTimeStr) {
+    if (!confirm(`確定要幫學員【${name}】取消於 ${logTimeStr} 的簽到，並退回 1 點嗎？`)) return;
+
+    setDisplay("⏳ 正在辦理取消簽到退點...", "theme-loading");
+
+    const result = await safeFetch({
+      action: "cancelCheckIn",
+      cardId: cardId,
+      name: name,
+      logTimeStr: logTimeStr
+    });
+
+    if (result && result.status === "success") {
+      playSoundSuccess();
+      alert(result.message);
+      fetchRecentLogs(); // 重新整理名單
+      setDisplay(`🎉 <b>已成功取消簽到！</b><br>學員：<b>${name}</b><br>已退回 1 點，目前剩餘：<b>${result.newPoints}</b> 點。`, "theme-admin");
+    } else {
+      playSoundError();
+      alert(result ? result.message : "取消簽到失敗");
     }
   }
 
@@ -904,6 +1035,15 @@
     isAdminMode = false;
     isReplaceMode = false;
     currentScannedCardForAdmin = "";
+    
+    // 清除閒置計時
+    if (adminIdleTimer) clearTimeout(adminIdleTimer);
+    if (adminCountdownInterval) clearInterval(adminCountdownInterval);
+    idleWarningBox.style.display = 'none';
+
+    document.getElementById('toggleDeleteUnlock').checked = false;
+    document.getElementById('btnDeleteCard').style.display = 'none';
+
     adminPanel.style.display = 'none';
     replaceSection.style.display = 'none';
     document.getElementById('recentLogsContainer').style.display = 'none';
