@@ -2,745 +2,515 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><文舞集>簽到系統</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>文舞集 目前課程</title>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
   <style>
+    :root {
+      --animated-gradient: linear-gradient(90deg, #ff007f, #7928ca, #00d2ff, #ff007f);
+      --primary-pink: #ff007f;
+      --border-color: #e2e2e8;
+      --text-main: #1d1d1f;
+      --text-sub: #6e6e73;
+    }
     * { box-sizing: border-box; }
-    body {
+    html, body {
+      height: 100%; margin: 0; padding: 0; background: #f2f3f8;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #121212;
-      color: #ffffff;
-      margin: 0;
-      padding: 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      color: var(--text-main); -webkit-tap-highlight-color: transparent; overflow: hidden;
     }
-    .card-container {
-      background: #1e1e1e;
-      padding: 24px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      max-width: 500px;
-      width: 100%;
-      text-align: center;
-      position: relative;
-    }
-    h2 { font-size: 28px; margin-top: 0; color: #ff007f; margin-bottom: 10px; }
-    
-    /* 課程專屬開關區域樣式 */
-    .course-section {
-      background: #282828;
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 15px;
-      border: 1px solid #333;
-    }
-    .course-title-header {
-      font-size: 15px;
-      color: #ffeb3b;
-      font-weight: bold;
-      text-align: left;
-      margin-bottom: 10px;
-    }
-    .course-item-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #1e1e1e;
-      padding: 10px 12px;
-      border-radius: 8px;
-      margin-bottom: 8px;
-      border: 1.5px solid #444;
-      transition: all 0.2s;
-    }
-    .course-item-row.active {
-      border-color: #00d2ff;
-      background: #10202b;
-      box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
-    }
-    .course-info {
-      text-align: left;
-    }
-    .course-name-text {
-      font-size: 16px;
-      font-weight: bold;
-      color: #fff;
-    }
-    .course-sub-text {
-      font-size: 13px;
-      color: #aaa;
-      margin-top: 2px;
-    }
-
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 26px;
-      flex-shrink: 0;
-    }
+    .app-container { display: flex; flex-direction: column; height: 100vh; max-width: 480px; margin: 0 auto; background: #ffffff; position: relative; }
+    .fixed-top-panel { background: #ffffff; padding: 16px 18px 12px 18px; border-bottom: 1px solid rgba(0, 0, 0, 0.06); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); z-index: 10; flex-shrink: 0; }
+    @keyframes titleGradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    h2 { text-align: center; margin: 0 0 6px 0; font-size: 1.75rem; font-weight: 900; background: var(--animated-gradient); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: titleGradientFlow 3s ease infinite; letter-spacing: 1px; }
+    .user-welcome { text-align: center; color: var(--text-sub); font-size: 0.88rem; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dashed #e5e5ea; }
+    .top-action-bar { display: flex; gap: 12px; justify-content: center; margin-top: 4px; }
+    .yellow-btn-box { flex: 1; background: linear-gradient(135deg, #fbcfe8, #fef08a); background-color: #facc15; color: #854d0e; border: 2px solid #eab308; border-radius: 12px; padding: 8px 12px; font-size: 0.92rem; font-weight: 900; text-align: center; cursor: pointer; box-shadow: 0 3px 8px rgba(234, 179, 8, 0.25); transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .yellow-btn-box:active { transform: scale(0.95); box-shadow: 0 1px 4px rgba(234, 179, 8, 0.2); }
+    .scrollable-content { flex: 1; overflow-y: auto; padding: 16px 18px; -webkit-overflow-scrolling: touch; }
+    .course-radio-input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .course-card-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 10px; }
+    @keyframes springSlideUp { 0% { opacity: 0; transform: translateY(30px) scale(0.92); } 60% { opacity: 1; transform: translateY(-6px) scale(1.02); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+    .card-item-wrapper { opacity: 0; animation: springSlideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+    .course-card { position: relative; background-color: #ffffff; border-radius: 18px; padding: 18px; cursor: pointer; border: 4px solid var(--border-color); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04); transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease, border-color 0.28s ease; display: block; overflow: hidden; z-index: 1; }
+    .course-card::before { content: ""; position: absolute; top: 50%; left: 50%; width: 250%; height: 500%; background: conic-gradient(#ff007f, #7928ca, #00d2ff, #ff007f); transform: translate(-50%, -50%) rotate(0deg); opacity: 0; transition: opacity 0.3s ease; z-index: -2; }
+    .course-card::after { content: ""; position: absolute; inset: 4px; background: #ffffff; border-radius: 12px; z-index: -1; }
+    .course-radio-input:checked + .course-card { border-color: transparent; transform: translateY(-4px) scale(1.01); box-shadow: 0 10px 24px rgba(255, 0, 127, 0.3); }
+    .course-radio-input:checked + .course-card::before { opacity: 1; animation: rotateNeon 3s linear infinite; }
+    .trial-badge { position: absolute; top: 10px; right: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 20px; box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3); z-index: 4; }
+    .course-header { display: flex; align-items: center; margin-bottom: 10px; }
+    .course-name { font-size: 1.15rem; font-weight: 900; color: var(--text-main); padding-right: 80px; line-height: 1.35; }
+    .course-info-group { display: flex; flex-direction: column; gap: 6px; font-size: 0.88rem; color: var(--text-sub); padding-right: 60px; }
+    .teacher-avatar-btn { position: absolute; right: 15px; bottom: 10px; width: 90px; height: 90px; border-radius: 70%; border: 2px solid #ff007f; background-color: #f3f4f6; background-size: cover; background-position: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); transition: transform 1s cubic-bezier(0.1, 2.56, 0.64, 1), box-shadow 5s ease; z-index: 3; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .teacher-avatar-btn:hover, .teacher-avatar-btn:active { transform: scale(1.3) rotate(10deg); box-shadow: 0 6px 16px rgba(255, 0, 127, 0.4); }
+    .loading-text { text-align: center; color: var(--text-sub); padding: 30px 0; font-size: 0.95rem; }
+    .fixed-bottom-panel { background: #ffffff; border-top: 1px solid rgba(0, 0, 0, 0.08); padding: 12px 18px 16px 18px; box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.08); z-index: 10; flex-shrink: 0; height: 180px; display: flex; align-items: center; }
+    .bottom-form-layout { display: flex; gap: 14px; width: 100%; align-items: flex-end; }
+    .left-action-group { width: 110px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+    @keyframes redGlowPulse { 0% { border-color: #ff0055; box-shadow: 0 0 4px rgba(255, 0, 85, 0.4); } 50% { border-color: #ff007f; box-shadow: 0 0 12px rgba(255, 0, 127, 0.85); } 100% { border-color: #ff0055; box-shadow: 0 0 4px rgba(255, 0, 85, 0.4); } }
+    @keyframes pulse-glow { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 127, 0.7); } 70% { transform: scale(1.15); box-shadow: 0 0 0 6px rgba(255, 0, 127, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 0, 127, 0); } }
+    .trial-switch-row { display: flex; align-items: center; justify-content: space-between; width: 100%; background: #f3f4f6; padding: 4px 8px; border-radius: 8px; height: 32px; transition: all 0.25s ease; border: 2px solid transparent; }
+    .trial-switch-row.active-glow { background: #fff0f5; animation: redGlowPulse 1.8s infinite ease-in-out; }
+    .trial-switch-label { font-size: 0.78rem; font-weight: 800; color: #374151; cursor: pointer; white-space: nowrap; }
+    .switch { position: relative; display: inline-block; width: 36px; height: 18px; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #555; transition: .3s; border-radius: 26px;
-    }
-    .slider:before {
-      position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
-      background-color: white; transition: .3s; border-radius: 50%;
-    }
-    input:checked + .slider { background-color: #00d2ff; }
-    input:checked + .slider:before { transform: translateX(24px); }
-
-    .status-display {
-      margin-top: 15px;
-      padding: 20px;
-      border-radius: 16px;
-      font-size: 20px;
-      font-weight: bold;
-      line-height: 1.5;
-      text-align: left;
-      min-height: 200px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      word-break: break-all;
-    }
-    .theme-standby { background-color: #2a2a2a; color: #aaa; border: 2px dashed #555; text-align: center; }
-    .theme-waiting {
-      background-color: #1a2332; color: #00d2ff; border: 3px solid #00d2ff;
-      animation: breathing-glow 2.5s infinite ease-in-out;
-    }
-    @keyframes breathing-glow {
-      0% { opacity: 0.5; border-color: rgba(0, 210, 255, 0.4); box-shadow: 0 0 5px rgba(0, 210, 255, 0.2); }
-      50% { opacity: 1; border-color: rgba(0, 210, 255, 1); box-shadow: 0 0 20px rgba(0, 210, 255, 0.8); }
-      100% { opacity: 0.5; border-color: rgba(0, 210, 255, 0.4); box-shadow: 0 0 5px rgba(0, 210, 255, 0.2); }
-    }
-    .theme-loading {
-      background-color: #332b00; color: #ffeb3b; position: relative; border: 4px solid transparent;
-      border-image: linear-gradient(90deg, #ffcc00, #332b00, #ffcc00, #332b00) 1; animation: marquee-border 1.2s linear infinite;
-    }
-    @keyframes marquee-border {
-      0% { border-image: linear-gradient(0deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
-      50% { border-image: linear-gradient(180deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
-      100% { border-image: linear-gradient(360deg, #ffcc00 0%, #332b00 50%, #ffcc00 100%) 1; }
-    }
-    .theme-success { background-color: #004d20; color: #00ff66; border: 3px solid #00ff66; }
-    .theme-error { background-color: #5a0000; color: #ff4d4d; border: 3px solid #ff4d4d; }
-    .theme-admin { background-color: #4a0072; color: #e040fb; border: 3px solid #e040fb; }
-
-    .highlight-val { font-size: 28px; font-weight: 900; color: #ffffff; text-decoration: underline; }
-    .warn-alert { display: inline-block; font-weight: 900; color: #ff3333; animation: blink-animation 0.8s infinite alternate; background-color: rgba(255, 0, 0, 0.2); padding: 2px 8px; border-radius: 8px; }
-    @keyframes blink-animation { 0% { opacity: 1; } 100% { opacity: 0.3; } }
-    .history-box { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.2); font-size: 14px; color: #e0e0e0; font-weight: normal; }
-    .history-title { font-size: 15px; font-weight: bold; color: #ffeb3b; margin-bottom: 4px; }
-    .history-item { padding: 2px 0; font-family: monospace; }
-
-    .confirm-box { display: none; background: #332b00; border: 3px solid #ffcc00; padding: 20px; border-radius: 16px; margin-top: 15px; text-align: center; }
-    .confirm-btn-group { display: flex; gap: 12px; margin-top: 15px; }
-    .btn-confirm-yes { flex: 1; background: #28a745; color: white; border: none; padding: 16px; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer; }
-    .btn-confirm-no { flex: 1; background: #dc3545; color: white; border: none; padding: 16px; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer; }
-    
-    .admin-panel { display: none; margin-top: 20px; padding: 20px; background: #2c2c2c; border-radius: 16px; border: 2px solid #e040fb; text-align: left; }
-    .admin-panel h3 { color: #e040fb; margin-top: 0; font-size: 20px; }
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 14px; margin-bottom: 5px; color: #ccc; }
-    .form-group input, .form-group select { width: 100%; padding: 10px; font-size: 16px; border-radius: 8px; border: none; background: #333; color: white; }
-    .btn-admin-act { background: #e040fb; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 8px; width: 100%; margin-top: 10px; cursor: pointer; }
-    .btn-danger { background: #d32f2f !important; }
-    .btn-info { background: #0288d1 !important; }
-    .btn-warning { background: #f57c00 !important; }
-    .btn-close-admin { background: #666; margin-top: 15px; }
-    .admin-section { margin-top: 15px; padding-top: 15px; border-top: 1px solid #444; }
-
-    .log-list { max-height: 200px; overflow-y: auto; background: #1e1e1e; border-radius: 8px; padding: 10px; margin-top: 10px; font-size: 14px; }
-    .log-item { padding: 8px 0; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-    .btn-refund { background: #ff9800; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
-
-    .switch-container { display: flex; align-items: center; justify-content: space-between; background: #222; padding: 10px 14px; border-radius: 8px; margin-top: 15px; }
-    
-    .idle-warning-box {
-      display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 460px; background: #d32f2f; color: white; padding: 15px; border-radius: 12px; box-shadow: 0 5px 20px rgba(255,0,0,0.6); z-index: 9999; text-align: center; font-weight: bold; animation: pulse-warn 1s infinite alternate;
-    }
-    @keyframes pulse-warn { 0% { transform: translateX(-50%) scale(1); } 100% { transform: translateX(-50%) scale(1.03); } }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 18px; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
+    .trial-switch-row.active-glow .slider:before { background-color: #ff007f; animation: pulse-glow 1.4s infinite ease-in-out; }
+    input:checked + .slider { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    input:checked + .slider:before { transform: translateX(18px); background-color: white !important; animation: none !important; }
+    .trial-switch-row.disabled { opacity: 0.4; pointer-events: none; background: #e5e7eb; animation: none; border-color: transparent; }
+    .submit-btn-square { width: 100%; aspect-ratio: 1 / 1; background: var(--animated-gradient); background-size: 200% 200%; animation: titleGradientFlow 3s ease infinite; color: white; border: none; border-radius: 16px; font-size: 1.15rem; font-weight: 900; cursor: pointer; box-shadow: 0 6px 16px rgba(255, 0, 127, 0.35); transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.2; }
+    .submit-btn-square:active:not(:disabled) { transform: scale(0.94); }
+    .submit-btn-square:disabled { background: #e0e0e0; animation: none; box-shadow: none; cursor: not-allowed; color: #a0a0a0; }
+    .input-fields-group { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+    .form-control-compact { width: 100%; height: 38px; padding: 0 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 0.88rem; background-color: #fafafa; transition: all 0.25s ease; outline: none; }
+    .form-control-compact:focus { background-color: #fff; border-color: var(--primary-pink); box-shadow: 0 0 0 3px rgba(255, 0, 127, 0.15); }
+    .select-trial-date { border-color: #f59e0b !important; background-color: #fffbe1 !important; color: #b45309 !important; font-weight: 800; visibility: hidden; }
+    .select-trial-date.active { visibility: visible; }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease; padding: 16px; }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal-box { position: relative; background: #ffffff; width: 100%; max-width: 420px; border-radius: 20px; padding: 16px 14px 14px 14px; text-align: center; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-height: 85vh; overflow-y: auto; }
+    .modal-overlay.active .modal-box { transform: scale(1); }
+    .modal-close-x { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; background: rgba(0, 0, 0, 0.06); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; color: #6b7280; cursor: pointer; transition: all 0.2s ease; z-index: 10; }
+    .modal-close-x:active { transform: scale(0.9); background: rgba(0, 0, 0, 0.15); }
+    .modal-title { font-size: 1.15rem; font-weight: 900; margin-bottom: 8px; line-height: 1.2; }
+    .modal-title.success { color: #10b981; } .modal-title.error { color: #ef4444; } .modal-title.announcement { color: #3b82f6; } .modal-title.teacher { color: #7928ca; text-align: left; } .modal-title.schedule { color: #6b21a8; } .modal-title.holiday { color: #d97706; }
+    .modal-body { font-size: 0.9rem; color: #4b5563; margin-bottom: 12px; line-height: 1.45; font-weight: 500; text-align: left; word-break: break-all; white-space: pre-wrap; }
+    .modal-btn { width: 100%; padding: 10px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 800; color: white; background: #1d1d1f; cursor: pointer; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+    .modal-btn:active { transform: scale(0.98); }
+    .schedule-table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 4px; border-radius: 8px; border: 1px solid #e5e7eb; }
+    .schedule-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 520px; }
+    .schedule-table th { padding: 5px 2px; background-color: #6b21a8; color: #ffffff; font-size: 11px; text-align: center; border: 1px solid #d1d5db; }
+    .schedule-table td { padding: 4px 2px; vertical-align: top; background-color: #ffffff; border: 1px solid #e5e7eb; line-height: 1.05; word-break: break-all; }
+    .schedule-table td.empty-td { text-align: center; background-color: #f9fafb; color: #9ca3af; font-size: 10px; vertical-align: middle; }
+    .sch-c-title { font-weight: bold; color: #111827; font-size: 11px; margin: 0; padding: 0; }
+    .sch-c-teacher { color: #2563eb; font-size: 10px; margin: 0; padding: 0; }
+    .sch-c-time { color: #ec4899; font-size: 10px; font-weight: 500; margin: 0; padding: 0; }
+    .holiday-list-group { display: flex; flex-direction: column; gap: 8px; }
+    .holiday-item { display: flex; justify-content: space-between; align-items: center; background: #fffbe1; border: 1.5px solid #fde047; padding: 8px 12px; border-radius: 10px; }
+    .holiday-date { font-weight: 900; color: #b45309; font-size: 0.95rem; }
+    .holiday-reason { font-weight: 700; color: #4b5563; font-size: 0.85rem; }
+    .teacher-photo-large { width: 100%; max-height: 200px; object-fit: cover; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); }
+    .teacher-section-title { font-size: 0.82rem; font-weight: 800; color: #7928ca; margin-top: 6px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .processing-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+    .processing-overlay.active { opacity: 1; visibility: visible; }
+    .spinner { width: 56px; height: 56px; border: 5px solid rgba(255, 255, 255, 0.2); border-top: 5px solid #ff007f; border-radius: 50%; animation: spin 0.9s linear infinite; margin-bottom: 20px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .processing-text { color: #ffffff; font-size: 1.25rem; font-weight: 800; letter-spacing: 1px; animation: textPulse 1.5s ease-in-out infinite; }
+    .processing-subtext { color: rgba(255, 255, 255, 0.7); font-size: 0.85rem; margin-top: 8px; }
+    @keyframes textPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
   </style>
 </head>
 <body>
 
-<div id="idleWarningBox" class="idle-warning-box">
-  ⚠️ 檢測到閒置！系統即將於 <span id="idleCountdownSec" style="font-size: 26px; text-decoration: underline;">10</span> 秒後自動退出管理者模式！<br>
-  <span style="font-size: 13px; opacity: 0.9;">(請點擊畫面任意處以繼續使用)</span>
-</div>
-
-<div class="card-container">
-  <h2>&lt;文舞集&gt; 簽到系統</h2>
-  
-  <div class="course-section">
-    <div class="course-title-header" id="todayTitle">📅 今日課程載入中...</div>
-    <div id="courseListContainer">
-      <div style="color:#aaa; font-size:14px; padding:10px 0;">讀取中，請稍候...</div>
-    </div>
-  </div>
-
-  <div id="displayWindow" class="status-display theme-standby">
-    請先開啟上方任意課程的感應開關...
-  </div>
-
-  <div id="confirmBox" class="confirm-box">
-    <div id="confirmMsg" style="font-size: 18px; color: #ffeb3b; font-weight: bold;"></div>
-    <div class="confirm-btn-group">
-      <button id="btnConfirmYes" class="btn-confirm-yes">是 (再扣 1 點)</button>
-      <button id="btnConfirmNo" class="btn-confirm-no">否 (取消)</button>
-    </div>
-  </div>
-
-  <div id="adminPanel" class="admin-panel">
-    <h3>👑 管理者控制台 (已暫停扣款)</h3>
-    <p style="font-size: 15px; color: #fff; margin-bottom: 5px;">當前感應卡號：<b id="adminTargetCard" style="color:#00d2ff; font-size:18px;">請靠卡...</b></p>
-    <p id="cardStatusBadge" style="font-size: 13px; color: #ffeb3b; font-weight: bold; margin-top: 0;"></p>
-
-    <div class="admin-section">
-      <button class="btn-admin-act btn-info" onclick="fetchRecentLogs()">📋 查詢 1 小時內簽到名單</button>
-      <div id="recentLogsContainer" style="display: none; margin-top: 10px;">
-        <div id="recentLogsList" class="log-list"></div>
+  <div class="app-container">
+    <div class="fixed-top-panel">
+      <h2>文舞集 目前課程</h2>
+      <div id="userWelcome" class="user-welcome">正在連結 LINE 帳號...</div>
+      <div class="top-action-bar">
+        <div class="yellow-btn-box" onclick="openScheduleModal()">週課表</div>
+        <div class="yellow-btn-box" onclick="openHolidayModal()">停課日期</div>
       </div>
     </div>
 
-    <div class="admin-section">
-      <button class="btn-admin-act btn-warning" onclick="toggleReplaceMode()">🔄 進入卡片遺失換卡模式</button>
-      <div id="replaceSection" style="display: none; background: #332200; border: 2px solid #ff9800; padding: 15px; border-radius: 12px; margin-top: 10px;">
-        <h4 style="color:#ff9800; margin-top:0;">💳 遺失換卡模式步驟：</h4>
-        <p style="font-size:13px; color:#ddd; margin: 5px 0;">1. 請將<b>【全新新卡】</b>靠卡感應<br>當前感應新卡號：<b id="newCardDisplay" style="color:#00d2ff;">未讀取</b></p>
-        <div class="form-group" style="margin-top: 10px;">
-          <label>2. 請輸入要換卡的會員姓名：</label>
-          <div style="display:flex; gap:8px;">
-            <input type="text" id="replaceSearchName" placeholder="輸入姓名...">
-            <button onclick="searchReplaceUser()" style="width:90px; background:#00b0ff; border:none; color:white; border-radius:8px; font-weight:bold;">查詢</button>
+    <form id="bookingForm" style="display: flex; flex-direction: column; flex: 1; overflow: hidden;">
+      <div class="scrollable-content">
+        <div id="courseCardList" class="course-card-list">
+          <div class="loading-text">✨ 課程載入中，請稍候...</div>
+        </div>
+      </div>
+
+      <div class="fixed-bottom-panel">
+        <div class="bottom-form-layout">
+          <div class="left-action-group">
+            <div id="trialSwitchRow" class="trial-switch-row disabled">
+              <label class="trial-switch-label" for="trialCheckbox">我要體驗</label>
+              <label class="switch">
+                <input type="checkbox" id="trialCheckbox" onchange="toggleTrialDateSelect()">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <button type="submit" class="submit-btn-square" id="submitBtn" disabled>確認<br>預約</button>
+          </div>
+
+          <div class="input-fields-group">
+            <select id="trialDateSelect" class="form-control-compact select-trial-date"></select>
+            <input type="text" id="name" class="form-control-compact" placeholder="請輸入姓名" required>
+            <input type="tel" id="phone" class="form-control-compact" placeholder="0912345678" maxlength="10" required>
           </div>
         </div>
-        <div id="replaceUserPreview" style="display:none; background:#222; padding:10px; border-radius:8px; margin-top:10px; font-size:14px;"></div>
-        <button id="btnConfirmReplace" class="btn-admin-act btn-danger" style="display:none; margin-top:10px;" onclick="executeCardReplace()">3. 確定更換（廢除舊卡）</button>
       </div>
-    </div>
-
-    <div id="sectionNewCard" class="admin-section" style="display: none;">
-      <h4>✨ 建立新會員資料</h4>
-      <div class="form-group"><label>使用者姓名：</label><input type="text" id="newUserName" placeholder="例如：王小明"></div>
-      <div class="form-group">
-        <label>卡片類別：</label>
-        <select id="newCardType"><option value="一般">一般會員</option><option value="VIP">VIP 會員</option><option value="體驗">體驗學員</option><option value="管理者">管理者</option></select>
-      </div>
-      <div class="form-group"><label>初始點數 (預設 10 點)：</label><input type="number" id="newCardPoints" value="10"></div>
-      <div class="form-group"><label>使用期限：</label><input type="date" id="newCardExpiry"></div>
-      <button class="btn-admin-act" onclick="submitNewCard()">確認開卡 / 建立帳號</button>
-    </div>
-
-    <div id="sectionAddPoints" class="admin-section" style="display: none;">
-      <h4>🎟️ 點數儲值與展延</h4>
-      <div class="form-group"><label>展延到期日：</label><input type="date" id="addPointExpiry"></div>
-      <button class="btn-admin-act" style="background:#00c853; margin-bottom: 8px;" onclick="submitAddPoints(10)">+ 增加 10 點</button>
-      <button class="btn-admin-act" style="background:#00b0ff; margin-bottom: 12px;" onclick="submitAddPoints(12)">+ 增加 12 點</button>
-      
-      <div class="switch-container">
-        <span style="font-size: 13px; color: #ff8a80; font-weight: bold;">解鎖刪除卡片功能：</span>
-        <label class="switch">
-          <input type="checkbox" id="toggleDeleteUnlock" onchange="handleToggleDelete(this)">
-          <span class="slider"></span>
-        </label>
-      </div>
-      <button id="btnDeleteCard" class="btn-admin-act btn-danger" style="display: none; margin-top: 10px;" onclick="submitDeleteCard()">🗑️ 確定刪除此卡片資料</button>
-    </div>
-
-    <button class="btn-admin-act btn-close-admin" onclick="closeAdminPanel()">退出管理者模式 (恢復打卡扣點)</button>
+    </form>
   </div>
-</div>
 
-<script>
-  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzou8bhecGqckgDOeM0dihDKurQlOQ6CURl2vFeZupA8NcTfMoULBWhLpnhMnurXviX/exec";
+  <div id="processingOverlay" class="processing-overlay">
+    <div class="spinner"></div>
+    <div class="processing-text">預約資料傳送中...</div>
+    <div class="processing-subtext">請勿關閉視窗，系統正在為您登記</div>
+  </div>
 
-  const displayWindow = document.getElementById('displayWindow');
-  const adminPanel = document.getElementById('adminPanel');
-  const adminTargetCard = document.getElementById('adminTargetCard');
-  const cardStatusBadge = document.getElementById('cardStatusBadge');
-  const confirmBox = document.getElementById('confirmBox');
-  const confirmMsg = document.getElementById('confirmMsg');
-  const sectionNewCard = document.getElementById('sectionNewCard');
-  const sectionAddPoints = document.getElementById('sectionAddPoints');
-  const replaceSection = document.getElementById('replaceSection');
-  const idleWarningBox = document.getElementById('idleWarningBox');
-  const idleCountdownSec = document.getElementById('idleCountdownSec');
+  <div id="announcementModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-close-x" onclick="closeAnnouncementModal()">✕</div>
+      <div class="modal-title announcement">公告</div>
+      <div id="announcementBody" class="modal-body"></div>
+      <button type="button" class="modal-btn" style="background:#3b82f6;" onclick="closeAnnouncementModal()">我知道了</button>
+    </div>
+  </div>
 
-  let ndefController = null;
-  let isScanning = false;
-  let activeCourse = null; // 當前啟動打卡的課程資訊物件
-  let isAdminMode = false;
-  let isReplaceMode = false;
-  let currentScannedCardForAdmin = "";
-  let pendingCardId = "";
-  let targetReplaceUser = null;
-  let autoResetTimer = null;
+  <div id="scheduleModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-close-x" onclick="closeScheduleModal()">✕</div>
+      <div class="modal-title schedule">週課表</div>
+      <div id="scheduleModalBody" class="modal-body"></div>
+      <button type="button" class="modal-btn" onclick="closeScheduleModal()">關閉視窗</button>
+    </div>
+  </div>
 
-  let adminIdleTimer = null;
-  let adminCountdownInterval = null;
-  let countdownSeconds = 10;
-  let audioCtx = null;
+  <div id="holidayModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-close-x" onclick="closeHolidayModal()">✕</div>
+      <div class="modal-title holiday">停課日期</div>
+      <div id="holidayModalBody" class="modal-body"></div>
+      <button type="button" class="modal-btn" onclick="closeHolidayModal()">關閉視窗</button>
+    </div>
+  </div>
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    await fetchTodayCourses();
-  });
+  <div id="teacherModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-close-x" onclick="closeTeacherModal()">✕</div>
+      <div id="teacherPhotoContainer"></div>
+      <div id="teacherModalTitle" class="modal-title teacher">師資介紹</div>
+      <div id="teacherModalBody" class="modal-body"></div>
+      <button type="button" class="modal-btn" onclick="closeTeacherModal()">關閉視窗</button>
+    </div>
+  </div>
 
-  async function fetchTodayCourses() {
-    try {
-      const res = await fetch(`${GAS_WEB_APP_URL}?action=getTodayCourses`);
-      const data = await res.json();
-      if (data.status === "success") {
-        document.getElementById('todayTitle').innerText = `📅 今日 (${data.todayDay}) 課程清單`;
-        renderCourseSwitches(data.courses);
-      } else {
-        document.getElementById('courseListContainer').innerHTML = `<div style="color:#ff4d4d;">無法載入今日課程：${data.message}</div>`;
+  <div id="customModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-close-x" onclick="closeCustomModal()">✕</div>
+      <div id="modalTitle" class="modal-title success">報名結果</div>
+      <div id="modalBody" class="modal-body" style="text-align: center;">內容加載中...</div>
+      <button type="button" class="modal-btn" onclick="closeCustomModal()">確定</button>
+    </div>
+  </div>
+
+  <script>
+    const MY_LIFF_ID = "2010788391-bIBpQ7sB";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzpFR7wxpoBoL74g_nUx_j88lN50VcKEbKW9h5_6gtalOqVzI3K-Ap0MYgsnUnbv0NPIg/exec";
+
+    let lineProfile = { userId: "", displayName: "" };
+    let globalCoursesData = []; 
+    let globalHolidaysData = [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const cachedCourses = localStorage.getItem("wenwu_courses_cache");
+      if (cachedCourses) {
+        try {
+          globalCoursesData = JSON.parse(cachedCourses);
+          renderCourses(globalCoursesData, true);
+        } catch (e) { console.error("讀取快取失敗:", e); }
       }
-    } catch (e) {
-      document.getElementById('courseListContainer').innerHTML = `<div style="color:#ff4d4d;">載入課程網路異常</div>`;
-    }
-  }
+      await initLIFF();
+      await fetchCourses();
+    });
 
-  function renderCourseSwitches(courses) {
-    const container = document.getElementById('courseListContainer');
-    if (!courses || courses.length === 0) {
-      container.innerHTML = `<div style="color:#aaa; font-size:14px; padding:10px 0;">今日無上架課程</div>`;
-      return;
-    }
-
-    container.innerHTML = courses.map((c, index) => `
-      <div class="course-item-row" id="courseRow_${index}">
-        <div class="course-info">
-          <div class="course-name-text">${c.courseName}</div>
-          <div class="course-sub-text">👤 ${c.teacher} | ⏰ ${c.timeInfo}</div>
-        </div>
-        <label class="switch">
-          <input type="checkbox" name="courseToggle" class="course-toggle-input" data-index="${index}" onchange="handleCourseToggle(this, ${JSON.stringify(c).replace(/"/g, '&quot;')})">
-          <span class="slider"></span>
-        </label>
-      </div>
-    `).join('');
-  }
-
-  function handleCourseToggle(checkbox, courseObj) {
-    initAudio();
-    const allSwitches = document.querySelectorAll('.course-toggle-input');
-    const allRows = document.querySelectorAll('.course-item-row');
-
-    if (checkbox.checked) {
-      // 確保一次只能開啟一個
-      allSwitches.forEach(sw => {
-        if (sw !== checkbox) sw.checked = false;
-      });
-      allRows.forEach(r => r.classList.remove('active'));
-
-      const parentRow = checkbox.closest('.course-item-row');
-      if (parentRow) parentRow.classList.add('active');
-
-      activeCourse = courseObj;
-      startNfcScan();
-    } else {
-      const parentRow = checkbox.closest('.course-item-row');
-      if (parentRow) parentRow.classList.remove('active');
-      activeCourse = null;
-      stopNfcScan();
-    }
-  }
-
-  function initAudio() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-  }
-
-  function playSoundSuccess() {
-    initAudio(); if (!audioCtx) return;
-    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-    osc.type = 'sine'; osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
-    osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.25);
-  }
-
-  function playSoundError() {
-    initAudio(); if (!audioCtx) return;
-    const now = audioCtx.currentTime;
-    const osc1 = audioCtx.createOscillator(); const gain1 = audioCtx.createGain();
-    osc1.type = 'sawtooth'; osc1.frequency.setValueAtTime(220, now);
-    gain1.gain.setValueAtTime(0.3, now); gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-    osc1.connect(gain1); gain1.connect(audioCtx.destination); osc1.start(now); osc1.stop(now + 0.15);
-  }
-
-  function resetAdminIdleTimer() {
-    if (!isAdminMode) return;
-    if (adminIdleTimer) clearTimeout(adminIdleTimer);
-    if (adminCountdownInterval) clearInterval(adminCountdownInterval);
-    idleWarningBox.style.display = 'none';
-    adminIdleTimer = setTimeout(() => { startIdleCountdown(); }, 30000);
-  }
-
-  function startIdleCountdown() {
-    countdownSeconds = 10;
-    idleCountdownSec.innerText = countdownSeconds;
-    idleWarningBox.style.display = 'block';
-    playSoundError();
-    adminCountdownInterval = setInterval(() => {
-      countdownSeconds--; idleCountdownSec.innerText = countdownSeconds; playSoundError();
-      if (countdownSeconds <= 0) {
-        clearInterval(adminCountdownInterval); idleWarningBox.style.display = 'none';
-        closeAdminPanel(); alert("⏱️ 管理者模式已超過 40 秒未操作，系統已自動退出！");
+    async function initLIFF() {
+      const welcomeEl = document.getElementById("userWelcome");
+      const submitBtn = document.getElementById("submitBtn");
+      try {
+        await liff.init({ liffId: MY_LIFF_ID });
+        if (!liff.isLoggedIn()) { liff.login(); return; }
+        const profile = await liff.getProfile();
+        lineProfile.userId = profile.userId;
+        lineProfile.displayName = profile.displayName;
+        welcomeEl.innerText = `👋 你好，${lineProfile.displayName}`;
+        submitBtn.disabled = false;
+        updateFormState();
+      } catch (err) {
+        console.error("LIFF 初始化失敗:", err);
+        welcomeEl.innerText = "⚠️ 請在 LINE App 內開啟此頁面";
       }
-    }, 1000);
-  }
+    }
 
-  ['click', 'touchstart', 'mousemove', 'keydown', 'scroll'].forEach(evt => {
-    window.addEventListener(evt, () => { if (isAdminMode) resetAdminIdleTimer(); }, { passive: true });
-  });
-
-  function calcFutureDate(days) {
-    const d = new Date(); d.setDate(d.getDate() + days);
-    return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-');
-  }
-
-  function calcRechargeExpiry(remainingPoints) {
-    return calcFutureDate(((Number(remainingPoints) || 0) * 10) + 100);
-  }
-
-  function setDisplay(htmlContent, themeClass) {
-    displayWindow.className = `status-display ${themeClass}`;
-    displayWindow.innerHTML = htmlContent;
-  }
-
-  function maskName(name) {
-    if (!name) return "";
-    const arr = Array.from(name);
-    if (arr.length > 1) arr[1] = "♥";
-    return arr.join("");
-  }
-
-  function resetAutoResetTimer() {
-    if (autoResetTimer) clearTimeout(autoResetTimer);
-    if (isAdminMode) return;
-    autoResetTimer = setTimeout(() => {
-      confirmBox.style.display = 'none'; pendingCardId = "";
-      if (isScanning && activeCourse) {
-        setDisplay(`📡 正在打卡：<b style="color:#fff;">${activeCourse.courseName}</b><br>請將卡片靠近手機背面感應...`, "theme-waiting");
-      } else {
-        setDisplay("請先開啟上方任意課程的感應開關...", "theme-standby");
+    function renderCourses(courses, isFromCache = false) {
+      const container = document.getElementById("courseCardList");
+      if (!courses || courses.length === 0) {
+        if (!isFromCache) container.innerHTML = "<div class='loading-text'>目前暫無開放預約的課程。</div>";
+        return;
       }
-    }, 30000);
-  }
+      const currentlyChecked = document.querySelector('input[name="courseSelection"]:checked')?.value;
+      container.innerHTML = ""; 
 
-  function pauseNfcScan() {
-    if (ndefController) { ndefController.abort(); ndefController = null; }
-  }
+      courses.forEach((course, index) => {
+        const isChecked = (currentlyChecked ? currentlyChecked === course.courseName : index === 0) ? "checked" : ""; 
+        const delay = isFromCache ? "0" : (index * 0.08).toFixed(2);
+        const formattedCourseName = course.courseName.replace(/[\(（]/g, '<br>(');
+        const badgeHtml = course.trialStatus === "開放" ? `<div class="trial-badge">開放體驗！</div>` : "";
+        const avatarStyle = course.teacherPhoto ? `style="background-image: url('${course.teacherPhoto}');"` : "";
+        const avatarIcon = course.teacherPhoto ? "" : "👤";
 
-  function resumeNfcScanWithCooldown(cooldownMs = 2000) {
-    if (autoResetTimer) clearTimeout(autoResetTimer);
-    resetAutoResetTimer();
-    const actualCooldown = (isAdminMode || isReplaceMode) ? 500 : cooldownMs;
-    setTimeout(() => { if (isScanning && !ndefController) restartNfcListener(); }, actualCooldown);
-  }
-
-  async function restartNfcListener() {
-    try {
-      ndefController = new AbortController();
-      const ndef = new NDEFReader();
-      await ndef.scan({ signal: ndefController.signal });
-
-      ndef.addEventListener("readingerror", () => {
-        pauseNfcScan(); setDisplay("❌ 讀取失敗，請重新靠卡一次", "theme-error");
-        playSoundError(); resumeNfcScanWithCooldown(3000);
-      });
-
-      ndef.addEventListener("reading", async ({ serialNumber }) => {
-        pauseNfcScan();
-        const cardId = serialNumber.replace(/:/g, '').toUpperCase();
-
-        if (isAdminMode) {
-          resetAdminIdleTimer();
-          currentScannedCardForAdmin = cardId;
-          adminTargetCard.innerText = cardId;
-          document.getElementById('toggleDeleteUnlock').checked = false;
-          document.getElementById('btnDeleteCard').style.display = 'none';
-
-          if (isReplaceMode) {
-            document.getElementById('newCardDisplay').innerText = cardId;
-            playSoundSuccess(); resumeNfcScanWithCooldown(500); return;
-          }
-
-          setDisplay("🔍 正在查詢卡片狀態...", "theme-loading");
-          try {
-            const checkRes = await safeFetch({ action: "checkCard", cardId: cardId });
-            if (!checkRes) { resumeNfcScanWithCooldown(500); return; }
-
-            if (checkRes.status === "exists") {
-              sectionNewCard.style.display = "none"; sectionAddPoints.style.display = "block";
-              document.getElementById('addPointExpiry').value = calcRechargeExpiry(checkRes.points);
-              cardStatusBadge.innerText = `⚠️ 既有學員：${checkRes.name}（剩餘 ${checkRes.points} 點，原到期日 ${checkRes.expiryDate || '無'}）`;
-              
-              let logsHtml = (checkRes.logsAfterRecharge && checkRes.logsAfterRecharge.length > 0)
-                ? checkRes.logsAfterRecharge.map(log => `<div class="history-item">🕒 ${log.time} <span style="color:#00ff66;">(剩 ${log.remainingPoints} 點)</span></div>`).join('')
-                : `<div class="history-item" style="color:#aaa;">儲值後尚無進場打卡紀錄</div>`;
-
-              setDisplay(`
-                <div style="text-align: center;">姓名：<b>${checkRes.name}</b><br>點數：<b>${checkRes.points}</b> 點<br>使用期限：${checkRes.expiryDate || '無期限'}</div>
-                <div class="history-box" style="margin-top:15px; text-align:left; max-height:160px; overflow-y:auto;">
-                  <div class="history-title" style="color:#00d2ff;">💰 最近一次儲值/開卡時間：</div>
-                  <div class="history-item" style="margin-bottom:8px; font-weight:bold;">${checkRes.lastRechargeTime}</div>
-                  <div class="history-title" style="color:#ffeb3b;">📌 儲值後進場打卡紀錄：</div>
-                  ${logsHtml}
-                </div>
-              `, "theme-admin");
-              playSoundSuccess();
-            } else {
-              sectionNewCard.style.display = "block"; sectionAddPoints.style.display = "none";
-              document.getElementById('newCardPoints').value = 10;
-              document.getElementById('newCardExpiry').value = calcFutureDate(100);
-              cardStatusBadge.innerText = "✨ 此為全新的空白卡片，可建立新資料";
-              setDisplay(`👑 <b>全新卡片</b><br>卡號：<b>${cardId}</b><br>請於下方面板填寫資料開卡。`, "theme-admin");
-              playSoundSuccess();
-            }
-          } catch (e) {
-            setDisplay("❌ 查詢卡片狀態失敗：" + e.message, "theme-error"); playSoundError();
-          }
-          resumeNfcScanWithCooldown(500); return;
-        }
-
-        processDeduct(cardId, false);
-      });
-    } catch (e) { console.error("NFC 自動重啟失敗:", e); }
-  }
-
-  async function startNfcScan() {
-    if (!('NDEFReader' in window)) {
-      setDisplay("⚠️ 瀏覽器不支援 Web NFC！<br>請確認使用 Android 上的 Chrome 瀏覽器", "theme-error");
-      playSoundError(); return;
-    }
-    isScanning = true;
-    setDisplay(`📡 正在打卡：<b style="color:#fff;">${activeCourse ? activeCourse.courseName : ''}</b><br>請將卡片靠近手機背面感應...`, "theme-waiting");
-    await restartNfcListener();
-  }
-
-  function stopNfcScan() {
-    if (autoResetTimer) clearTimeout(autoResetTimer);
-    pauseNfcScan(); isScanning = false;
-    if (!isAdminMode) setDisplay("感應已停止。請開啟上方課程開關。", "theme-standby");
-  }
-
-  async function safeFetch(payload) {
-    try {
-      const response = await fetch(GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) });
-      if (!response.ok) { setDisplay(`⚠️ <b>伺服器回應異常 (${response.status})</b>`, "theme-error"); playSoundError(); return null; }
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) { setDisplay("⚠️ <b>Google 伺服器連線繁忙</b><br>請稍後 3 秒重新靠卡感應。", "theme-error"); playSoundError(); return null; }
-      return await response.json();
-    } catch (err) { setDisplay(`❌ <b>連線失敗：</b><br>請檢查網路連線後重試。`, "theme-error"); playSoundError(); return null; }
-  }
-
-  async function processDeduct(cardId, isForce = false) {
-    confirmBox.style.display = 'none';
-    setDisplay(`💳 掃描卡號：<b>${cardId}</b><br>⏳ <b>資料處理中，請勿重複刷卡...</b>`, "theme-loading");
-
-    const payload = {
-      action: "deduct",
-      cardId: cardId,
-      isForce: isForce,
-      courseName: activeCourse ? activeCourse.courseName : "",
-      teacherName: activeCourse ? activeCourse.teacher : ""
-    };
-
-    const result = await safeFetch(payload);
-    if (!result) { resumeNfcScanWithCooldown(2000); return; }
-
-    if (result.status === "success") {
-      playSoundSuccess();
-      let pointsDisplay = result.remainingPoints <= 3 
-        ? `<span class="warn-alert">${result.remainingPoints} 次 ⚠️ 點數即將用完！</span>`
-        : `<span class="highlight-val">${result.remainingPoints}</span> 次`;
-
-      let expiryDisplay = `<span class="highlight-val">${result.expiryDate}</span>`;
-      if (result.expiryDate && result.expiryDate !== "無期限") {
-        const today = new Date(); today.setHours(0,0,0,0);
-        const diffDays = Math.ceil((new Date(result.expiryDate) - today) / (1000 * 60 * 60 * 24));
-        if (diffDays < 10) expiryDisplay = `<span class="warn-alert">${result.expiryDate} (${diffDays <= 0 ? "已過期！" : `剩 ${diffDays} 天`})</span>`;
-      }
-
-      let historyHtml = (result.recent5Logs && result.recent5Logs.length > 0)
-        ? `<div class="history-box"><div class="history-title">📅 最近 5 次打卡紀錄：</div>${result.recent5Logs.map(log => `<div class="history-item">🕒 ${log}</div>`).join('')}</div>`
-        : "";
-
-      setDisplay(`
-        <div style="font-size:24px; color:#00ff66; text-align:center; margin-bottom:6px;">🎉 報到成功 (${activeCourse ? activeCourse.courseName : ''})</div>
-        <div style="font-size:32px; text-align:center; margin-bottom:10px; color:#fff;">${maskName(result.name)}</div>
-        🎟️ 剩餘點數：${pointsDisplay}<br>
-        📅 使用期限：${expiryDisplay}
-        ${historyHtml}
-      `, "theme-success");
-
-    } else if (result.status === "need_confirm") {
-      playSoundError(); pendingCardId = cardId; confirmMsg.innerHTML = result.message; confirmBox.style.display = 'block'; setDisplay(`⚠️ <b>請於下方選擇是否繼續扣點</b>`, "theme-admin");
-    } else if (result.status === "admin") {
-      playSoundSuccess(); isAdminMode = true; resetAdminIdleTimer();
-      if (autoResetTimer) clearTimeout(autoResetTimer);
-      currentScannedCardForAdmin = ""; adminTargetCard.innerText = "請靠卡..."; cardStatusBadge.innerText = "";
-      sectionNewCard.style.display = "none"; sectionAddPoints.style.display = "none";
-      setDisplay(`👑 <b>管理者解鎖！</b><br>已進入管理者模式，<b>簽到扣款已暫停</b>。<br>請感應欲處理的會員卡號。`, "theme-admin");
-      adminPanel.style.display = 'block';
-    } else {
-      playSoundError(); setDisplay(`❌ <b>打卡失敗：</b><br>${result.message}<br><br>💳 卡號：${cardId}`, "theme-error");
-    }
-    resumeNfcScanWithCooldown(2000);
-  }
-
-  document.getElementById('btnConfirmYes').addEventListener('click', () => { if (pendingCardId) { processDeduct(pendingCardId, true); pendingCardId = ""; } });
-  document.getElementById('btnConfirmNo').addEventListener('click', () => { pendingCardId = ""; confirmBox.style.display = 'none'; setDisplay("已取消扣點。請重新靠卡打卡。", "theme-standby"); resumeNfcScanWithCooldown(1000); });
-
-  function toggleReplaceMode() {
-    isReplaceMode = !isReplaceMode;
-    if (isReplaceMode) {
-      replaceSection.style.display = 'block'; sectionNewCard.style.display = 'none'; sectionAddPoints.style.display = 'none';
-      setDisplay("🔄 <b>已切換至卡片遺失換卡模式</b><br>請先感應「全新卡片」，再輸入舊學員姓名搜尋。", "theme-admin");
-    } else {
-      replaceSection.style.display = 'none'; targetReplaceUser = null; setDisplay("已離開換卡模式。", "theme-admin");
-    }
-  }
-
-  async function searchReplaceUser() {
-    const name = document.getElementById('replaceSearchName').value.trim();
-    if (!name) return alert("請輸入會員姓名！");
-    const result = await safeFetch({ action: "searchUserByName", name: name });
-    const previewEl = document.getElementById('replaceUserPreview');
-    const confirmBtn = document.getElementById('btnConfirmReplace');
-
-    if (result && result.status === "found") {
-      playSoundSuccess(); targetReplaceUser = result.cardData; previewEl.style.display = "block";
-      previewEl.innerHTML = `<b style="color:#00ff66;">✅ 找到學員資料：</b><br>• 姓名：<b>${targetReplaceUser.name}</b><br>• 剩餘點數：<b>${targetReplaceUser.points}</b> 點<br>• 舊卡號：<span style="color:#ff4d4d; text-decoration:line-through;">${targetReplaceUser.oldCardId}</span>`;
-      confirmBtn.style.display = "block";
-    } else {
-      playSoundError(); targetReplaceUser = null; previewEl.style.display = "block";
-      previewEl.innerHTML = `<b style="color:#ff4d4d;">❌ 查無此會員名字！</b>`; confirmBtn.style.display = "none";
-    }
-  }
-
-  async function executeCardReplace() {
-    const newCardId = document.getElementById('newCardDisplay').innerText;
-    if (newCardId === "未讀取" || !newCardId) return alert("請先感應全新新卡片！");
-    if (!targetReplaceUser) return alert("請先搜尋並確認會員資料！");
-    if (!confirm(`⚠️ 確認更換？\n\n確定將【${targetReplaceUser.name}】的卡號由 ${targetReplaceUser.oldCardId} 更換為 ${newCardId} 嗎？\n舊卡號將會廢除！`)) return;
-
-    setDisplay("⏳ 正在辦理換卡與廢除舊卡...", "theme-loading");
-    const result = await safeFetch({ action: "replaceCard", oldCardId: targetReplaceUser.oldCardId, newCardId: newCardId, name: targetReplaceUser.name });
-    if (result && result.status === "success") {
-      playSoundSuccess(); alert(result.message); toggleReplaceMode();
-      document.getElementById('newCardDisplay').innerText = "未讀取"; document.getElementById('replaceSearchName').value = ""; document.getElementById('replaceUserPreview').style.display = "none";
-      setDisplay(`🎉 <b>換卡成功！</b><br>會員：<b>${targetReplaceUser.name}</b><br>新卡號已被綁定，舊卡已註銷。`, "theme-admin");
-    } else { playSoundError(); alert(result ? result.message : "換卡失敗"); }
-  }
-
-  async function submitNewCard() {
-    const name = document.getElementById('newUserName').value.trim();
-    const cardType = document.getElementById('newCardType').value;
-    const points = document.getElementById('newCardPoints').value;
-    const expiryDate = document.getElementById('newCardExpiry').value;
-    if (!currentScannedCardForAdmin) return alert("請先感應要開卡的 NFC 卡片！");
-    if (!name) return alert("請輸入使用者姓名！");
-
-    setDisplay("⏳ 正在建立新卡片資料...", "theme-loading");
-    const result = await safeFetch({ action: "addCard", cardId: currentScannedCardForAdmin, name: name, cardType: cardType, points: points, expiryDate: expiryDate });
-    if (result) {
-      alert(result.message);
-      if (result.status === "success") {
-        playSoundSuccess(); document.getElementById('newUserName').value = ""; adminTargetCard.innerText = "請感應下張卡片..."; cardStatusBadge.innerText = ""; sectionNewCard.style.display = "none";
-        setDisplay(`👑 <b>卡片建立成功！</b><br>可繼續感應下一張卡片。`, "theme-admin");
-      } else playSoundError();
-    }
-  }
-
-  async function submitAddPoints(amount) {
-    if (!currentScannedCardForAdmin) return alert("請先感應要加點的會員卡片！");
-    const expiryDate = document.getElementById('addPointExpiry').value;
-    if (!confirm(`確定要為卡號 ${currentScannedCardForAdmin} 增加 ${amount} 點，並設定到期日為 ${expiryDate} 嗎？`)) return;
-
-    setDisplay("⏳ 點數儲值中...", "theme-loading");
-    const result = await safeFetch({ action: "addPoints", cardId: currentScannedCardForAdmin, addPointsAmount: amount, expiryDate: expiryDate });
-    if (result) {
-      alert(result.message);
-      if (result.status === "success") {
-        playSoundSuccess(); adminTargetCard.innerText = "請感應下張卡片..."; cardStatusBadge.innerText = ""; sectionAddPoints.style.display = "none";
-        setDisplay(`👑 <b>加點成功！</b><br>可繼續感應下一張卡片。`, "theme-admin");
-      } else playSoundError();
-    }
-  }
-
-  function handleToggleDelete(checkbox) {
-    document.getElementById('btnDeleteCard').style.display = checkbox.checked ? 'block' : 'none';
-  }
-
-  async function submitDeleteCard() {
-    if (!currentScannedCardForAdmin) return alert("請先感應要刪除的卡片！");
-    if (!confirm(`⚠️ 確定要刪除卡號 ${currentScannedCardForAdmin} 的所有資料嗎？此操作無法復原！`)) return;
-
-    setDisplay("⏳ 正在刪除卡片...", "theme-loading");
-    const result = await safeFetch({ action: "deleteCard", cardId: currentScannedCardForAdmin });
-    if (result) {
-      alert(result.message);
-      if (result.status === "success") {
-        playSoundSuccess(); document.getElementById('toggleDeleteUnlock').checked = false; document.getElementById('btnDeleteCard').style.display = 'none';
-        adminTargetCard.innerText = "請感應下張卡片..."; cardStatusBadge.innerText = ""; sectionAddPoints.style.display = "none";
-        setDisplay(`👑 <b>卡片已成功刪除！</b><br>可繼續感應其他卡片。`, "theme-admin");
-      } else playSoundError();
-    }
-  }
-
-  async function fetchRecentLogs() {
-    const container = document.getElementById('recentLogsContainer');
-    const listEl = document.getElementById('recentLogsList');
-    listEl.innerHTML = "載入中..."; container.style.display = "block";
-    const result = await safeFetch({ action: "getRecentLogs" });
-    if (result && result.status === "success") {
-      playSoundSuccess();
-      if (result.logs.length === 0) {
-        listEl.innerHTML = "<div style='color:#aaa; text-align:center;'>過去 1 小時內無學員簽到紀錄</div>";
-      } else {
-        listEl.innerHTML = result.logs.map(log => {
-          const isCancelled = log.note.includes("已取消");
-          return `
-            <div class="log-item">
-              <div>
-                <span>⏰ ${log.time} - <b>${log.name}</b></span>
-                <div style="font-size:11px; color:${isCancelled ? '#ff4d4d' : '#888'};">${log.note || '已簽到'} (${log.courseName || '未指定'})</div>
+        const cardHtml = `
+          <div class="card-item-wrapper" style="animation-delay: ${delay}s;">
+            <input type="radio" name="courseSelection" id="course_${index}" value="${course.courseName}" class="course-radio-input" ${isChecked} onchange="updateFormState()">
+            <label for="course_${index}" class="course-card">
+              ${badgeHtml}
+              <div class="course-header"><span class="course-name">${formattedCourseName}</span></div>
+              <div class="course-info-group">
+                <div>👤 <b>${course.teacher}</b></div>
+                <div>⏰ <b>${course.timeInfo}</b></div>
               </div>
-              <div>${isCancelled ? '<span style="color:#aaa; font-size:12px;">(已退點)</span>' : `<button class="btn-refund" onclick="cancelCheckIn('${log.cardId}', '${log.name}', '${log.fullTime}')">↩️ 取消簽到退點</button>`}</div>
-            </div>
-          `;
-        }).join('');
+              <div class="teacher-avatar-btn" ${avatarStyle} onclick="openTeacherModal(${index}, event)" title="點擊查看 ${course.teacher} 老師簡介">
+                ${avatarIcon}
+              </div>
+            </label>
+          </div>
+        `;
+        container.insertAdjacentHTML("beforeend", cardHtml);
+      });
+      updateFormState();
+    }
+
+    async function fetchCourses() {
+      const container = document.getElementById("courseCardList");
+      try {
+        // 帶上當下時間戳記 ?t=${Date.now()} 避免瀏覽器及 LINE 快取干擾
+        const fetchUrl = `${GAS_URL}?t=${Date.now()}`;
+        const response = await fetch(fetchUrl);
+        const data = await response.json();
+
+        if (data.status === "success") {
+          if (data.holidays) globalHolidaysData = data.holidays;
+          if (data.announcement && data.announcement.trim() !== "") showAnnouncementModal(data.announcement);
+          if (data.courses && data.courses.length > 0) {
+            globalCoursesData = data.courses;
+            renderCourses(globalCoursesData, false);
+            localStorage.setItem("wenwu_courses_cache", JSON.stringify(data.courses));
+          }
+        } else if (!localStorage.getItem("wenwu_courses_cache")) {
+          container.innerHTML = "<div class='loading-text'>目前暫無開放預約的課程。</div>";
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+        // 如果請求失敗，但有本機快取，優先維持快取的顯示；若無視訊快取才顯示錯誤提示
+        if (!localStorage.getItem("wenwu_courses_cache")) {
+          container.innerHTML = "<div class='loading-text' style='color:red;'>載入課程失敗，請重新整理。</div>";
+        }
       }
-    } else playSoundError();
-  }
+    }
 
-  async function cancelCheckIn(cardId, name, logTimeStr) {
-    if (!confirm(`確定要幫學員【${name}】取消於 ${logTimeStr} 的簽到，並退回 1 點嗎？`)) return;
-    setDisplay("⏳ 正在辦理取消簽到退點...", "theme-loading");
-    const result = await safeFetch({ action: "cancelCheckIn", cardId: cardId, name: name, logTimeStr: logTimeStr });
-    if (result && result.status === "success") {
-      playSoundSuccess(); alert(result.message); fetchRecentLogs();
-      setDisplay(`🎉 <b>已成功取消簽到！</b><br>學員：<b>${name}</b><br>已退回 1 點，目前剩餘：<b>${result.newPoints}</b> 點。`, "theme-admin");
-    } else { playSoundError(); alert(result ? result.message : "取消簽到失敗"); }
-  }
+    function openScheduleModal() {
+      const bodyEl = document.getElementById("scheduleModalBody");
+      if (!globalCoursesData || globalCoursesData.length === 0) {
+        bodyEl.innerHTML = "<div style='text-align:center; color:#6b7280;'>目前尚無課程資料。</div>";
+        document.getElementById("scheduleModal").classList.add("active");
+        return;
+      }
+      const daysOfWeek = ["週一", "週二", "週三", "週四", "週五", "週六", "週日"];
+      const scheduleByDay = { "週一": [], "週二": [], "週三": [], "週四": [], "週五": [], "週六": [], "週日": [] };
 
-  function closeAdminPanel() {
-    isAdminMode = false; isReplaceMode = false; currentScannedCardForAdmin = "";
-    if (adminIdleTimer) clearTimeout(adminIdleTimer);
-    if (adminCountdownInterval) clearInterval(adminCountdownInterval);
-    idleWarningBox.style.display = 'none';
-    document.getElementById('toggleDeleteUnlock').checked = false; document.getElementById('btnDeleteCard').style.display = 'none';
-    adminPanel.style.display = 'none'; replaceSection.style.display = 'none'; document.getElementById('recentLogsContainer').style.display = 'none';
-    setDisplay("已退出管理者模式，恢復簽到打卡系統。", "theme-standby");
-    resumeNfcScanWithCooldown(1000);
-  }
-</script>
+      globalCoursesData.forEach(c => {
+        const dayKey = getDayKey(c.timeInfo);
+        if (dayKey) {
+          const timeOnly = c.timeInfo.replace(/(週|周|星期|禮拜)[一二三四五六日天]\s*/g, "").trim();
+          scheduleByDay[dayKey].push({
+            cName: c.courseName, teacher: c.teacher, timeInfo: timeOnly, minutes: parseStartTimeMinutes(c.timeInfo)
+          });
+        }
+      });
+
+      let maxRowsCount = 0;
+      daysOfWeek.forEach(day => {
+        scheduleByDay[day].sort((a, b) => a.minutes - b.minutes);
+        if (scheduleByDay[day].length > maxRowsCount) maxRowsCount = scheduleByDay[day].length;
+      });
+
+      let tableHeaderHtml = daysOfWeek.map(day => `<th>${day}</th>`).join("");
+      let tableBodyRowsHtml = "";
+      if (maxRowsCount === 0) {
+        tableBodyRowsHtml = `<tr>${daysOfWeek.map(() => `<td class="empty-td">-</td>`).join("")}</tr>`;
+      } else {
+        for (let rowIndex = 0; rowIndex < maxRowsCount; rowIndex++) {
+          let rowCellsHtml = "";
+          daysOfWeek.forEach(day => {
+            const item = scheduleByDay[day][rowIndex];
+            rowCellsHtml += item ? `<td><div class="sch-c-title">${item.cName}</div><div class="sch-c-teacher">${item.teacher}</div><div class="sch-c-time">${item.timeInfo}</div></td>` : `<td class="empty-td">-</td>`;
+          });
+          tableBodyRowsHtml += `<tr>${rowCellsHtml}</tr>`;
+        }
+      }
+      bodyEl.innerHTML = `<div class="schedule-table-wrapper"><table class="schedule-table"><thead><tr>${tableHeaderHtml}</tr></thead><tbody>${tableBodyRowsHtml}</tbody></table></div>`;
+      document.getElementById("scheduleModal").classList.add("active");
+    }
+
+    function closeScheduleModal() { document.getElementById("scheduleModal").classList.remove("active"); }
+
+    function openHolidayModal() {
+      const bodyEl = document.getElementById("holidayModalBody");
+      if (!globalHolidaysData || globalHolidaysData.length === 0) {
+        bodyEl.innerHTML = "<div style='text-align:center; color:#6b7280; padding:15px 0;'>目前暫無預定的停課日期！</div>";
+      } else {
+        const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+        const validHolidays = globalHolidaysData.filter(item => !item.timestamp || item.timestamp === 0 || item.timestamp >= todayStart.getTime()).slice(0, 10);
+        if (validHolidays.length === 0) {
+          bodyEl.innerHTML = "<div style='text-align:center; color:#6b7280; padding:15px 0;'>目前暫無預定的停課日期！</div>";
+        } else {
+          let itemsHtml = validHolidays.map(item => `<div class="holiday-item"><div class="holiday-date">${item.formattedDate}</div><div class="holiday-reason">${item.reason}</div></div>`).join("");
+          bodyEl.innerHTML = `<div class="holiday-list-group">${itemsHtml}</div>`;
+        }
+      }
+      document.getElementById("holidayModal").classList.add("active");
+    }
+
+    function closeHolidayModal() { document.getElementById("holidayModal").classList.remove("active"); }
+
+    function getDayKey(timeStr) {
+      if (!timeStr) return null;
+      const str = timeStr.toString();
+      if (/週一|周一|星期一|禮拜一/.test(str)) return "週一";
+      if (/週二|周二|星期二|禮拜二/.test(str)) return "週二";
+      if (/週三|周三|星期三|禮拜三/.test(str)) return "週三";
+      if (/週四|周四|星期四|禮拜四/.test(str)) return "週四";
+      if (/週五|周五|星期五|禮拜五/.test(str)) return "週五";
+      if (/週六|周六|星期六|禮拜六/.test(str)) return "週六";
+      if (/週日|周日|星期日|禮拜日|星期天|禮拜天/.test(str)) return "週日";
+      return null;
+    }
+
+    function parseStartTimeMinutes(timeStr) {
+      if (!timeStr) return 9999;
+      const match = timeStr.toString().match(/(\d{1,2}):(\d{2})/);
+      return match ? parseInt(match[1], 10) * 60 + parseInt(match[2], 10) : 9999;
+    }
+
+    function openTeacherModal(index, event) {
+      if (event) event.stopPropagation(); 
+      const course = globalCoursesData[index];
+      if (!course) return;
+      document.getElementById("teacherModalTitle").innerText = `${course.teacher} 老師`;
+      let contentHtml = "";
+      if (course.teacherStyle) contentHtml += `<div class="teacher-section-title">專長風格</div><div>${course.teacherStyle}</div>`;
+      if (course.teacherExp) contentHtml += `<div class="teacher-section-title" style="margin-top:10px;">經歷簡介</div><div>${course.teacherExp}</div>`;
+      document.getElementById("teacherModalBody").innerHTML = contentHtml || "暫無詳細介紹。";
+      document.getElementById("teacherPhotoContainer").innerHTML = (course.teacherPhoto && course.teacherPhoto.trim() !== "") ? `<img src="${course.teacherPhoto}" class="teacher-photo-large" alt="${course.teacher}">` : "";
+      document.getElementById("teacherModal").classList.add("active");
+    }
+
+    function closeTeacherModal() { document.getElementById("teacherModal").classList.remove("active"); }
+    function showAnnouncementModal(text) { document.getElementById("announcementBody").textContent = text; document.getElementById("announcementModal").classList.add("active"); }
+    function closeAnnouncementModal() { document.getElementById("announcementModal").classList.remove("active"); }
+
+    function updateFormState() {
+      const selectedRadio = document.querySelector('input[name="courseSelection"]:checked');
+      const trialSwitchRow = document.getElementById("trialSwitchRow");
+      const trialCheckbox = document.getElementById("trialCheckbox");
+      if (!selectedRadio || globalCoursesData.length === 0) return;
+
+      const courseObj = globalCoursesData.find(c => c.courseName === selectedRadio.value);
+      if (courseObj && courseObj.trialStatus === "開放") {
+        trialSwitchRow.classList.remove("disabled"); trialSwitchRow.classList.add("active-glow"); 
+        const trialDateSelect = document.getElementById("trialDateSelect");
+        trialDateSelect.innerHTML = "";
+        let firstAvailableSet = false;
+        generateNextThreeDates(courseObj.timeInfo).forEach(optData => {
+          const opt = document.createElement("option");
+          opt.value = optData.formatted;
+          if (optData.isHoliday) {
+            opt.textContent = `體驗日：${optData.formatted} (停課，不可選擇)`; opt.disabled = true; opt.style.color = "#a0a0a0"; opt.style.backgroundColor = "#f3f3f3";
+          } else {
+            opt.textContent = `體驗日：${optData.formatted}`;
+            if (!firstAvailableSet) { opt.selected = true; firstAvailableSet = true; }
+          }
+          trialDateSelect.appendChild(opt);
+        });
+      } else {
+        trialSwitchRow.classList.add("disabled"); trialSwitchRow.classList.remove("active-glow");
+        trialCheckbox.checked = false; toggleTrialDateSelect();
+      }
+    }
+
+    function toggleTrialDateSelect() {
+      const trialCheckbox = document.getElementById("trialCheckbox");
+      const trialDateSelect = document.getElementById("trialDateSelect");
+      if (trialCheckbox.checked) trialDateSelect.classList.add("active"); else trialDateSelect.classList.remove("active");
+    }
+
+    function generateNextThreeDates(timeStr) {
+      const dayMap = { "週一": 1, "周一": 1, "星期一": 1, "禮拜一": 1, "週二": 2, "周二": 2, "星期二": 2, "禮拜二": 2, "週三": 3, "周三": 3, "星期三": 3, "禮拜三": 3, "週四": 4, "周四": 4, "星期四": 4, "禮拜四": 4, "週五": 5, "周五": 5, "星期五": 5, "禮拜五": 5, "週六": 6, "周六": 6, "星期六": 6, "禮拜六": 6, "週日": 0, "周日": 0, "星期日": 0, "禮拜日": 0, "星期天": 0, "禮拜天": 0 };
+      let targetDay = -1;
+      for (let key in dayMap) { if (timeStr.includes(key)) { targetDay = dayMap[key]; break; } }
+      const holidayDates = (globalHolidaysData || []).map(h => h.rawDateStr || h.formattedDate);
+      const results = [];
+      let validCount = 0, current = new Date(); current.setDate(current.getDate() + 1);
+
+      while (validCount < 3) {
+        if (targetDay === -1 || current.getDay() === targetDay) {
+          const formatted = formatDateMD(current);
+          const isHoliday = holidayDates.some(h => h && h.includes(formatted.split(' ')[0]));
+          results.push({ formatted: formatted, isHoliday: isHoliday });
+          if (!isHoliday) validCount++;
+        }
+        current.setDate(current.getDate() + 1);
+      }
+      return results;
+    }
+
+    function formatDateMD(dateObj) {
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const date = String(dateObj.getDate()).padStart(2, '0');
+      const dayNames = ["日", "一", "二", "三", "四", "五", "六"];
+      return `${month}/${date} (${dayNames[dateObj.getDay()]})`;
+    }
+
+    document.getElementById("bookingForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      if (!lineProfile.userId) return showCustomModal({ isSuccess: false, title: "報名失敗", body: "無法讀取您的 LINE 身份，請確認已在 LINE 內開啟網頁！" });
+      const selectedCourse = document.querySelector('input[name="courseSelection"]:checked');
+      if (!selectedCourse) return showCustomModal({ isSuccess: false, title: "報名失敗", body: "請先選擇欲報名的課程！" });
+
+      const isTrial = document.getElementById("trialCheckbox").checked;
+      const trialDateSelect = document.getElementById("trialDateSelect");
+      const trialDate = isTrial ? trialDateSelect.value : "正式報名";
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const submitBtn = document.getElementById("submitBtn");
+      const processingOverlay = document.getElementById("processingOverlay");
+
+      submitBtn.disabled = true; processingOverlay.classList.add("active");
+
+      const payload = { userId: lineProfile.userId, displayName: lineProfile.displayName, name: name, phone: phone, item: selectedCourse.value, isTrial: isTrial, trialDate: trialDate };
+
+      try {
+        const res = await fetch(GAS_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+        const result = await res.json();
+        processingOverlay.classList.remove("active");
+        if (result.status === "success") {
+          const bodyMsg = isTrial ? `預約學員：<b>${name}</b><br>體驗課程：${result.courseName}<br>體驗日期：<b style="color:#d97706;">${result.trialDate}</b>` : `預約學員：<b>${name}</b><br>報名課程：${result.courseName}<br>狀態：${result.bookingStatus}`;
+          showCustomModal({ isSuccess: true, title: isTrial ? "體驗預約成功" : "報名成功", body: bodyMsg, autoCloseLiff: true });
+        } else {
+          showCustomModal({ isSuccess: false, title: result.status === "full" ? "名額已滿" : "報名失敗", body: result.message });
+        }
+      } catch (err) {
+        processingOverlay.classList.remove("active");
+        showCustomModal({ isSuccess: false, title: "報名失敗", body: "系統連線錯誤，請稍後再試！" });
+      } finally { submitBtn.disabled = false; }
+    });
+
+    let shouldCloseLiff = false;
+    function showCustomModal({ isSuccess, title, body, autoCloseLiff = false }) {
+      const modal = document.getElementById("customModal");
+      shouldCloseLiff = autoCloseLiff;
+      document.getElementById("modalTitle").className = isSuccess ? "modal-title success" : "modal-title error";
+      document.getElementById("modalTitle").innerText = title;
+      document.getElementById("modalBody").innerHTML = body;
+      modal.classList.add("active");
+    }
+    function closeCustomModal() {
+      document.getElementById("customModal").classList.remove("active");
+      if (shouldCloseLiff && typeof liff !== "undefined" && liff.closeWindow) liff.closeWindow();
+    }
+  </script>
 </body>
 </html>
