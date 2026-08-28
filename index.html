@@ -458,11 +458,14 @@
     if (autoResetTimer) clearTimeout(autoResetTimer);
     resetAutoResetTimer();
 
+    // 管理者模式與換卡模式下，自動冷卻時間改為 1 秒
+    const actualCooldown = (isAdminMode || isReplaceMode) ? 1000 : cooldownMs;
+
     setTimeout(() => {
       if (isScanning && !ndefController) {
         restartNfcListener();
       }
-    }, cooldownMs);
+    }, actualCooldown);
   }
 
   async function restartNfcListener() {
@@ -489,7 +492,7 @@
           if (isReplaceMode) {
             document.getElementById('newCardDisplay').innerText = cardId;
             playSoundSuccess();
-            resumeNfcScanWithCooldown(3000);
+            resumeNfcScanWithCooldown(1000); // 管理者冷卻 1 秒
             return;
           }
 
@@ -498,7 +501,7 @@
           try {
             const checkRes = await safeFetch({ action: "checkCard", cardId: cardId });
             if (!checkRes) {
-              resumeNfcScanWithCooldown(3000);
+              resumeNfcScanWithCooldown(1000);
               return;
             }
 
@@ -511,7 +514,7 @@
 
               cardStatusBadge.innerText = `⚠️ 既有學員：${checkRes.name}（剩餘 ${checkRes.points} 點，原到期日 ${checkRes.expiryDate || '無'}）`;
               
-              // 組合打卡紀錄與剩餘點數 HTML
+              // 組合打卡紀錄與當時進場剩餘點數 HTML
               let logsHtml = "";
               if (checkRes.logsAfterRecharge && checkRes.logsAfterRecharge.length > 0) {
                 logsHtml = checkRes.logsAfterRecharge.map(log => 
@@ -528,7 +531,7 @@
                   使用期限：${checkRes.expiryDate || '無期限'}
                 </div>
                 <div class="history-box" style="margin-top:15px; text-align:left; max-height:160px; overflow-y:auto;">
-                  <div class="history-title" style="color:#00d2ff;">💰 最近一次儲值時間：</div>
+                  <div class="history-title" style="color:#00d2ff;">💰 最近一次儲值/開卡時間：</div>
                   <div class="history-item" style="margin-bottom:8px; font-weight:bold;">${checkRes.lastRechargeTime}</div>
                   <div class="history-title" style="color:#ffeb3b;">📌 儲值後進場打卡紀錄：</div>
                   ${logsHtml}
@@ -550,7 +553,7 @@
             setDisplay("❌ 查詢卡片狀態失敗：" + e.message, "theme-error");
             playSoundError();
           }
-          resumeNfcScanWithCooldown(3000);
+          resumeNfcScanWithCooldown(1000); // 管理者冷卻 1 秒
           return;
         }
 
