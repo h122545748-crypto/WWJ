@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><文舞集>簽到</title>
+  <title><文舞集>簽到系統</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -27,18 +27,18 @@
       text-align: center;
       position: relative;
     }
-    h2 { font-size: 28px; margin-top: 0; color: #ff007f; margin-bottom: 15px; }
+    h2 { font-size: 28px; margin-top: 0; color: #ff007f; margin-bottom: 10px; }
 
-    /* 今日課程選擇區塊 */
-    .today-courses-section {
+    /* 🟢 今日課程切換區塊樣式 */
+    .today-course-panel {
       background: #282828;
       border: 2px solid #ff007f;
       border-radius: 14px;
-      padding: 14px;
+      padding: 12px 16px;
       margin-bottom: 15px;
       text-align: left;
     }
-    .courses-section-title {
+    .today-course-header {
       font-size: 16px;
       font-weight: bold;
       color: #ff007f;
@@ -47,42 +47,33 @@
       justify-content: space-between;
       align-items: center;
     }
-    .course-switch-item {
+    .today-course-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .course-toggle-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #1e1e1e;
-      padding: 10px 12px;
+      background: #1a1a1a;
+      padding: 8px 12px;
       border-radius: 10px;
-      margin-top: 8px;
       border: 1px solid #444;
     }
-    .course-info-text {
+    .course-toggle-info {
       display: flex;
       flex-direction: column;
     }
-    .course-title { font-size: 16px; font-weight: bold; color: #fff; }
-    .course-sub { font-size: 13px; color: #aaa; margin-top: 2px; }
-
-    /* 滑動開關 (Toggle Switch) 樣式 */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 26px;
-      flex-shrink: 0;
+    .course-toggle-name {
+      font-size: 15px;
+      font-weight: bold;
+      color: #fff;
     }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #555; transition: .3s; border-radius: 26px;
+    .course-toggle-sub {
+      font-size: 12px;
+      color: #aaa;
     }
-    .slider:before {
-      position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px;
-      background-color: white; transition: .3s; border-radius: 50%;
-    }
-    input:checked + .slider { background-color: #00d2ff; }
-    input:checked + .slider:before { transform: translateX(24px); }
 
     .status-display {
       margin-top: 15px;
@@ -92,7 +83,7 @@
       font-weight: bold;
       line-height: 1.6;
       text-align: left;
-      min-height: 220px;
+      min-height: 200px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -222,6 +213,7 @@
       background: #ff9800; color: white; border: none; padding: 5px 10px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer;
     }
 
+    /* 滑動開關 (Toggle Switch) 樣式 */
     .switch-container {
       display: flex;
       align-items: center;
@@ -231,8 +223,24 @@
       border-radius: 8px;
       margin-top: 15px;
     }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #555; transition: .3s; border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: #ff007f; }
+    input:checked + .slider:before { transform: translateX(20px); }
 
-    /* 倒數警訊彈窗 */
     .idle-warning-box {
       display: none;
       position: fixed;
@@ -265,21 +273,20 @@
 </div>
 
 <div class="card-container">
-  <h2>&lt;文舞集&gt;簽到打卡</h2>
-  
-  <!-- 📅 今日課程列表與開關區塊 -->
-  <div class="today-courses-section">
-    <div class="courses-section-title">
-      <span>🗓️ 今日上課課程 (<span id="todayDayName">載入中...</span>)</span>
-      <span style="font-size: 12px; color: #ffeb3b;">請開啟現場欲打卡課程</span>
+  <h2>&lt;文舞集&gt;簽到</h2>
+
+  <!-- 🟢 今日課程列表與滑動開關區塊 -->
+  <div class="today-course-panel">
+    <div class="today-course-header">
+      <span>📅 今日課程開關 (<span id="currentDayText">載入中</span>)</span>
     </div>
-    <div id="todayCoursesList">
-      <div style="color: #aaa; font-size: 14px; text-align: center; padding: 10px;">⏳ 正在取得今日課程...</div>
+    <div id="todayCourseList" class="today-course-list">
+      <div style="color: #aaa; font-size: 13px;">正在獲取今日課程...</div>
     </div>
   </div>
 
   <div id="displayWindow" class="status-display theme-waiting">
-    📡 NFC 感應啟動中...<br>請開啟上方課程開關並靠卡
+    📡 NFC 感應等待中...<br>請將卡片靠近手機背面
   </div>
 
   <div id="confirmBox" class="confirm-box">
@@ -399,16 +406,73 @@
   let pendingCardId = "";
   let targetReplaceUser = null;
   let autoResetTimer = null;
+  let todayCourses = [];
 
   let adminIdleTimer = null;
   let adminCountdownInterval = null;
   let countdownSeconds = 10;
+
   let audioCtx = null;
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    await fetchTodayCourses();
+  document.addEventListener("DOMContentLoaded", () => {
+    loadTodayCourses();
     startNfcScan();
   });
+
+  function getTodayWeekDayStr() {
+    const days = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+    return days[new Date().getDay()];
+  }
+
+  async function loadTodayCourses() {
+    const dayStr = getTodayWeekDayStr();
+    document.getElementById('currentDayText').innerText = dayStr;
+    const listEl = document.getElementById('todayCourseList');
+
+    try {
+      const res = await fetch(GAS_WEB_APP_URL);
+      const data = await res.json();
+      
+      if (data.status === "success" && data.courses) {
+        // 過濾出包含今天星期幾的課程
+        todayCourses = data.courses.filter(c => c.timeInfo && c.timeInfo.includes(dayStr));
+
+        if (todayCourses.length === 0) {
+          listEl.innerHTML = `<div style="color:#aaa; font-size:13px;">今天 (${dayStr}) 無排定課程</div>`;
+          return;
+        }
+
+        listEl.innerHTML = todayCourses.map((c, idx) => `
+          <div class="course-toggle-item">
+            <div class="course-toggle-info">
+              <span class="course-toggle-name">${c.courseName}</span>
+              <span class="course-toggle-sub">👤 ${c.teacher} | ⏰ ${c.timeInfo}</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" class="course-switch" data-course="${c.courseName}" data-teacher="${c.teacher}" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        `).join('');
+      } else {
+        listEl.innerHTML = `<div style="color:#ff4d4d; font-size:13px;">無法載入課程清單</div>`;
+      }
+    } catch (e) {
+      listEl.innerHTML = `<div style="color:#ff4d4d; font-size:13px;">載入課程失敗</div>`;
+    }
+  }
+
+  function getSelectedCourses() {
+    const switches = document.querySelectorAll('.course-switch:checked');
+    const selected = [];
+    switches.forEach(sw => {
+      selected.push({
+        courseName: sw.getAttribute('data-course'),
+        teacher: sw.getAttribute('data-teacher')
+      });
+    });
+    return selected;
+  }
 
   function initAudio() {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -455,49 +519,6 @@
     gain2.connect(audioCtx.destination);
     osc2.start(now + 0.2);
     osc2.stop(now + 0.4);
-  }
-
-  /* 🗓️ 抓取今日課程與開關產生 */
-  async function fetchTodayCourses() {
-    const listContainer = document.getElementById("todayCoursesList");
-    const dayNameEl = document.getElementById("todayDayName");
-
-    const result = await safeFetch({ action: "getTodayCourses" });
-    if (result && result.status === "success") {
-      dayNameEl.innerText = result.dayOfWeek;
-
-      if (!result.courses || result.courses.length === 0) {
-        listContainer.innerHTML = `<div style="color: #aaa; font-size: 14px; text-align: center; padding: 8px;">今日無預定課程</div>`;
-        return;
-      }
-
-      let html = "";
-      result.courses.forEach((c, idx) => {
-        html += `
-          <div class="course-switch-item">
-            <div class="course-info-text">
-              <span class="course-title">${c.courseName}</span>
-              <span class="course-sub">👤 ${c.teacher} | ⏰ ${c.timeInfo}</span>
-            </div>
-            <label class="switch">
-              <input type="checkbox" class="today-course-toggle" value="${c.courseName}">
-              <span class="slider"></span>
-            </label>
-          </div>
-        `;
-      });
-      listContainer.innerHTML = html;
-    } else {
-      dayNameEl.innerText = "讀取失敗";
-      listContainer.innerHTML = `<div style="color: #ff4d4d; font-size: 14px; text-align: center; padding: 8px;">無法取得今日課程資料</div>`;
-    }
-  }
-
-  function getSelectedCourses() {
-    const toggles = document.querySelectorAll(".today-course-toggle:checked");
-    const selected = [];
-    toggles.forEach(t => selected.push(t.value));
-    return selected;
   }
 
   function resetAdminIdleTimer() {
@@ -573,7 +594,7 @@
     autoResetTimer = setTimeout(() => {
       confirmBox.style.display = 'none';
       pendingCardId = "";
-      setDisplay("📡 NFC 讀取中...<br>請將卡片靠近手機背面打卡", "theme-waiting");
+      setDisplay("📡 NFC 讀取中...<br>請將卡片靠近手機背面", "theme-waiting");
     }, 30000);
   }
 
@@ -704,6 +725,7 @@
     }
 
     isScanning = true;
+    setDisplay("📡 NFC 讀取中...<br>請將卡片靠近手機背面", "theme-waiting");
     await restartNfcListener();
   }
 
@@ -738,8 +760,8 @@
 
   async function processDeduct(cardId, isForce = false) {
     confirmBox.style.display = 'none';
-
-    // 取得當前現場勾選的課程
+    
+    // 獲取目前啟動的課程
     const selectedCourses = getSelectedCourses();
 
     setDisplay(`💳 掃描卡號：<b>${cardId}</b><br>⏳ <b>資料處理中，請勿重複刷卡...</b>`, "theme-loading");
@@ -789,14 +811,9 @@
       }
 
       const maskedName = maskName(result.name);
-      const coursesLoggedText = result.recordedCourses && result.recordedCourses.length > 0
-        ? `<div style="font-size:14px; color:#ffeb3b; margin-top:4px;">📌 登記課程：${result.recordedCourses.join(', ')}</div>`
-        : "";
-
       setDisplay(`
         <div style="font-size:28px; color:#00ff66; text-align:center; margin-bottom:10px;">🎉 歡迎報到</div>
-        <div style="font-size:36px; text-align:center; margin-bottom:5px; color:#fff;">${maskedName}</div>
-        ${coursesLoggedText}
+        <div style="font-size:36px; text-align:center; margin-bottom:15px; color:#fff;">${maskedName}</div>
         🎟️ 剩餘點數：${pointsDisplay}<br>
         📅 使用期限：${expiryDisplay}
         ${historyHtml}
@@ -930,7 +947,7 @@
     if (!name) return alert("請輸入使用者姓名！");
 
     setDisplay("⏳ 正在建立新卡片資料...", "theme-loading");
-    
+
     const result = await safeFetch({
       action: "addCard",
       cardId: currentScannedCardForAdmin,
@@ -1089,7 +1106,7 @@
     adminPanel.style.display = 'none';
     replaceSection.style.display = 'none';
     document.getElementById('recentLogsContainer').style.display = 'none';
-    setDisplay("已退出管理者模式，恢復簽到打卡系統。", "theme-standby");
+    setDisplay("已退出管理者模式，恢復簽到打卡系統。", "theme-waiting");
     resumeNfcScanWithCooldown(1000);
   }
 </script>
