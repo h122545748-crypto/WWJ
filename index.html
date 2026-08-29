@@ -61,14 +61,26 @@
     .idle-warning-box{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);width:90%;max-width:460px;background:#ff0000;color:#fff;padding:15px;border-radius:12px;box-shadow:0 0 25px rgba(255,0,0,1);z-index:9999;text-align:center;font-weight:700;animation:pulse-warn .5s infinite alternate}
     @keyframes pulse-warn{0%{transform:translateX(-50%) scale(1);background:#ff0000}100%{transform:translateX(-50%) scale(1.04);background:#ff6600}}
 
-    /* 手機月結算彈出報告燈箱 */
-    .report-modal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:10000;justify-content:center;align-items:center;padding:15px}
-    .report-content-box{background:#1e1e1e;border:2px solid #00d2ff;border-radius:16px;width:100%;max-width:480px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 20px rgba(0,210,255,0.4)}
-    .report-header{background:#2a2a2a;padding:15px;border-bottom:1px solid #444;display:flex;justify-content:space-between;align-items:center}
-    .report-header h4{margin:0;color:#00d2ff;font-size:18px}
-    .report-body{padding:15px;overflow-y:auto;font-family:monospace;font-size:14px;white-space:pre-wrap;word-break:break-all;color:#fff;line-height:1.5;text-align:left}
-    .btn-close-modal{background:#ff007f;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer}
+    /* 手機月結算彈出報告燈箱（美化表格化） */
+    .report-modal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:10000;justify-content:center;align-items:center;padding:12px}
+    .report-content-box{background:#1a1a1a;border:2px solid #00d2ff;border-radius:16px;width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 25px rgba(0,210,255,0.3)}
+    .report-header{background:linear-gradient(135deg, #2a2a2a, #111);padding:14px 18px;border-bottom:1px solid #444;display:flex;justify-content:space-between;align-items:center}
+    .report-header h4{margin:0;color:#00d2ff;font-size:18px;display:flex;align-items:center;gap:6px}
+    .report-body{padding:12px;overflow-y:auto;color:#fff;line-height:1.4;text-align:left}
+    .btn-close-modal{background:#ff007f;color:#fff;border:none;padding:6px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:14px}
     .settlement-control-box{background:#222;border:1px solid #444;padding:10px;border-radius:8px;margin-bottom:10px;display:flex;gap:8px}
+
+    /* 報表美化樣式 */
+    .summary-card{background:linear-gradient(135deg,#3a1c5d,#1a0b33);border-radius:10px;padding:12px;margin-bottom:12px;border:1px solid #7b2cbf;display:flex;justify-content:space-around;text-align:center}
+    .summary-item .num{font-size:20px;font-weight:900;color:#00ff66}
+    .summary-item .label{font-size:12px;color:#bbb}
+    .teacher-section{margin-bottom:16px;background:#242424;border-radius:10px;border:1px solid #333;overflow:hidden}
+    .teacher-head{background:#4a0072;color:#fff;padding:8px 12px;font-weight:700;font-size:15px;display:flex;justify-content:space-between}
+    .report-table{width:100%;border-collapse:collapse;font-size:13px}
+    .report-table th{background:#333;color:#00d2ff;padding:8px 6px;text-align:left;font-weight:600;border-bottom:1px solid #444}
+    .report-table td{padding:8px 6px;border-bottom:1px solid #2a2a2a;vertical-align:top}
+    .badge-count{background:#00d2ff;color:#000;font-weight:700;padding:2px 6px;border-radius:10px;font-size:12px}
+    .student-tag{display:inline-block;background:#333;color:#e0e0e0;padding:2px 6px;border-radius:4px;margin:2px;font-size:12px;border:1px solid #444}
   </style>
 </head>
 <body>
@@ -121,7 +133,7 @@
       <!-- 月份選擇與結算控制 -->
       <div class="settlement-control-box">
         <select id="selectSettlementMonth" style="flex:1;padding:8px;background:#333;color:#fff;border:none;border-radius:6px;font-size:16px;">
-          <!-- 動態載入月份 -->
+          <option value="">自動搜尋月份中...</option>
         </select>
         <button class="btn-admin-act btn-info" style="margin-top:0;width:auto;padding:8px 15px;" onclick="triggerMonthlySettlement()">📊 月份結算</button>
       </div>
@@ -209,13 +221,22 @@
     initMonthDropdown();
   });
 
-  function initMonthDropdown(){
+  // 自動偵測紀錄月份填入下拉選單
+  async function initMonthDropdown(){
     const select = document.getElementById("selectSettlementMonth");
-    const now = new Date();
+    const res = await safeFetch({action: "getAvailableLogMonths"});
+    
     select.innerHTML = "";
-    for(let i=0; i<6; i++){
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const mStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}`;
+    if(res && res.status === "success" && res.months && res.months.length > 0){
+      res.months.forEach(mStr => {
+        const opt = document.createElement("option");
+        opt.value = mStr;
+        opt.innerText = `${mStr} 紀錄`;
+        select.appendChild(opt);
+      });
+    } else {
+      const now = new Date();
+      const mStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}`;
       const opt = document.createElement("option");
       opt.value = mStr;
       opt.innerText = `${mStr} 紀錄`;
@@ -391,7 +412,7 @@
         📅 使用期限：${o}
         ${s}
       `,"theme-success");
-    }else"need_confirm"===n.status?(playSoundError(),pendingCardId=t,confirmMsg.innerHTML=n.message,confirmBox.style.display="block",setDisplay("⚠️ <b>請於下方選擇是否繼續扣點</b>","theme-admin")):"admin"===n.status?(playSoundSuccess(),isAdminMode=!0,resetAdminIdleTimer(),autoResetTimer&&clearTimeout(autoResetTimer),currentScannedCardForAdmin="",adminTargetCard.innerText="請靠卡...",cardStatusBadge.innerText="",sectionNewCard.style.display="none",sectionAddPoints.style.display="none",setDisplay("👑 <b>管理者解鎖！</b><br>已進入管理者模式，<b>簽到扣款已暫停</b>。<br>請感應欲處理的會員卡號。","theme-admin"),adminPanel.style.display="block"):(playSoundError(),setDisplay(`❌ <b>打卡失敗：</b><br>${n.message}<br><br>💳 卡號：${t}`,"theme-error"));
+    }else"need_confirm"===n.status?(playSoundError(),pendingCardId=t,confirmMsg.innerHTML=n.message,confirmBox.style.display="block",setDisplay("⚠️ <b>請於下方選擇是否繼續扣點</b>","theme-admin")):"admin"===n.status?(playSoundSuccess(),isAdminMode=!0,resetAdminIdleTimer(),autoResetTimer&&clearTimeout(autoResetTimer),currentScannedCardForAdmin="",adminTargetCard.innerText="請靠卡...",cardStatusBadge.innerText="",sectionNewCard.style.display="none",sectionAddPoints.style.display="none",setDisplay("👑 <b>管理者解鎖！</b><br>已進入管理者模式，<b>簽到扣款已暫停</b>。<br>請感應欲處理的會員卡號。","theme-admin"),adminPanel.style.display="block",initMonthDropdown()):(playSoundError(),setDisplay(`❌ <b>打卡失敗：</b><br>${n.message}<br><br>💳 卡號：${t}`,"theme-error"));
     resumeNfcScanWithCooldown(2e3);
   }
 
@@ -478,16 +499,17 @@
     }
   }
 
-  // 需求 2：執行月份結算並於小視窗顯示報告
+  // 執行月份結算並於小視窗顯示美化表格
   async function triggerMonthlySettlement(){
     const targetMonth = document.getElementById("selectSettlementMonth").value;
+    if(!targetMonth) return alert("請先選擇要結算的月份！");
     if(confirm(`確定要執行【${targetMonth}】老師課堂人次結算嗎？`)){
       setDisplay("⏳ 正在計算並生成月統計報告...","theme-loading");
       const res = await safeFetch({action: "monthlySettlement", targetMonth: targetMonth});
       if(res && res.status === "success"){
         playSoundSuccess();
         setDisplay(`🎉 <b>結算成功！</b><br>已生成試算表：<b>${res.sheetName}</b>`,"theme-admin");
-        showReportModal(`${targetMonth} 月份結算`, res.reportText);
+        showReportModal(`${targetMonth} 月份結算`, res.statsData);
       } else {
         playSoundError();
         alert(res ? res.message : "結算失敗");
@@ -495,9 +517,90 @@
     }
   }
 
-  function showReportModal(title, text){
-    document.getElementById("reportTitle").innerText = `📊 ${title}`;
-    document.getElementById("reportText").innerText = text || "無打卡數據紀錄。";
+  // 渲染表格化美化彈窗
+  function showReportModal(title, stats){
+    document.getElementById("reportTitle").innerHTML = `📊 ${title}`;
+    const reportBody = document.getElementById("reportText");
+    
+    if (!stats || Object.keys(stats).length === 0) {
+      reportBody.innerHTML = `<div style="text-align:center;padding:30px;color:#aaa;">⚠️ 該月份尚無任何有效的簽到扣點紀錄</div>`;
+      document.getElementById("reportModal").style.display = "flex";
+      return;
+    }
+
+    let totalAttendance = 0;
+    let totalClasses = 0;
+    let html = "";
+
+    for (const teacher in stats) {
+      let teacherCount = 0;
+      let teacherRowsHtml = "";
+
+      for (const course in stats[teacher]) {
+        const sortedDates = Object.keys(stats[teacher][course]).sort((a,b) => {
+          const pA = a.split("/").map(Number);
+          const pB = b.split("/").map(Number);
+          return (pA[0] * 31 + pA[1]) - (pB[0] * 31 + pB[1]);
+        });
+
+        for (const dStr of sortedDates) {
+          const students = stats[teacher][course][dStr];
+          const count = students.length;
+          totalAttendance += count;
+          teacherCount += count;
+          totalClasses++;
+
+          const studentBadges = students.map(s => `<span class="student-tag">${s}</span>`).join("");
+
+          teacherRowsHtml += `
+            <tr>
+              <td>
+                <div style="font-weight:bold;color:#fff;">${course}</div>
+                <div style="font-size:11px;color:#00d2ff;">📅 ${dStr}</div>
+              </td>
+              <td style="text-align:center;"><span class="badge-count">${count}人</span></td>
+              <td>${studentBadges}</td>
+            </tr>
+          `;
+        }
+      }
+
+      html += `
+        <div class="teacher-section">
+          <div class="teacher-head">
+            <span>👤 授課老師：${teacher}</span>
+            <span>小計：${teacherCount} 人次</span>
+          </div>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th style="width:35%;">課程/日期</th>
+                <th style="width:20%;text-align:center;">人次</th>
+                <th style="width:45%;">學員名單</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${teacherRowsHtml}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    const summaryHtml = `
+      <div class="summary-card">
+        <div class="summary-item">
+          <div class="num">${totalAttendance}</div>
+          <div class="label">本月總上課人次</div>
+        </div>
+        <div class="summary-item">
+          <div class="num" style="color:#00d2ff;">${totalClasses}</div>
+          <div class="label">總開課堂數</div>
+        </div>
+      </div>
+    `;
+
+    reportBody.innerHTML = summaryHtml + html;
     document.getElementById("reportModal").style.display = "flex";
   }
 
