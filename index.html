@@ -9,7 +9,6 @@
     .card-container{background:#1e1e1e;padding:24px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:500px;width:100%;text-align:center;position:relative}
     h2{font-size:28px;margin-top:0;color:#ff007f}
     
-    /* 當日課程清單卡片容器 */
     .course-list-box{background:#2a2a2a;border:1px solid #444;border-radius:12px;padding:12px;margin:15px 0;text-align:left}
     .course-list-title{font-size:16px;font-weight:700;color:#00d2ff;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
     .course-item{display:flex;align-items:center;justify-content:space-between;background:#181818;padding:10px 12px;border-radius:8px;margin-bottom:8px;border:1px solid #333}
@@ -59,9 +58,17 @@
     input:checked+.slider{background-color:#00ff66}
     input:checked+.slider:before{transform:translateX(24px)}
     
-    /* 需求 3：管理者 10 秒高亮警報燈箱 */
     .idle-warning-box{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);width:90%;max-width:460px;background:#ff0000;color:#fff;padding:15px;border-radius:12px;box-shadow:0 0 25px rgba(255,0,0,1);z-index:9999;text-align:center;font-weight:700;animation:pulse-warn .5s infinite alternate}
     @keyframes pulse-warn{0%{transform:translateX(-50%) scale(1);background:#ff0000}100%{transform:translateX(-50%) scale(1.04);background:#ff6600}}
+
+    /* 手機月結算彈出報告燈箱 */
+    .report-modal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:10000;justify-content:center;align-items:center;padding:15px}
+    .report-content-box{background:#1e1e1e;border:2px solid #00d2ff;border-radius:16px;width:100%;max-width:480px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 20px rgba(0,210,255,0.4)}
+    .report-header{background:#2a2a2a;padding:15px;border-bottom:1px solid #444;display:flex;justify-content:space-between;align-items:center}
+    .report-header h4{margin:0;color:#00d2ff;font-size:18px}
+    .report-body{padding:15px;overflow-y:auto;font-family:monospace;font-size:14px;white-space:pre-wrap;word-break:break-all;color:#fff;line-height:1.5;text-align:left}
+    .btn-close-modal{background:#ff007f;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-weight:700;cursor:pointer}
+    .settlement-control-box{background:#222;border:1px solid #444;padding:10px;border-radius:8px;margin-bottom:10px;display:flex;gap:8px}
   </style>
 </head>
 <body>
@@ -71,10 +78,20 @@
   <span style="font-size:14px;opacity:.9">(請滑動或點擊畫面任意處以繼續使用)</span>
 </div>
 
+<!-- 月結算報告彈出視窗 -->
+<div id="reportModal" class="report-modal">
+  <div class="report-content-box">
+    <div class="report-header">
+      <h4 id="reportTitle">📊 月份結算報告</h4>
+      <button class="btn-close-modal" onclick="closeReportModal()">關閉</button>
+    </div>
+    <div id="reportText" class="report-body">載入中...</div>
+  </div>
+</div>
+
 <div class="card-container">
   <h2>&lt;文舞集&gt;簽到</h2>
 
-  <!-- 需求 1：當日上架課程清單及對應滑動開關 -->
   <div class="course-list-box">
     <div class="course-list-title">
       <span>📅 當日上架課程 (現場人員操作)</span>
@@ -100,9 +117,15 @@
     <p style="font-size:16px;color:#fff;margin-bottom:5px">當前感應卡號：<b id="adminTargetCard" style="color:#00d2ff;font-size:20px">請靠卡...</b></p>
     <p id="cardStatusBadge" style="font-size:14px;color:#ffeb3b;font-weight:700;margin-top:0"></p>
 
-    <!-- 需求 6：管理者介面直接月結算按鈕 -->
     <div class="admin-section">
-      <button class="btn-admin-act btn-info" onclick="triggerMonthlySettlement()">📊 執行本月老師課堂人次結算</button>
+      <!-- 月份選擇與結算控制 -->
+      <div class="settlement-control-box">
+        <select id="selectSettlementMonth" style="flex:1;padding:8px;background:#333;color:#fff;border:none;border-radius:6px;font-size:16px;">
+          <!-- 動態載入月份 -->
+        </select>
+        <button class="btn-admin-act btn-info" style="margin-top:0;width:auto;padding:8px 15px;" onclick="triggerMonthlySettlement()">📊 月份結算</button>
+      </div>
+
       <button class="btn-admin-act btn-info" style="margin-top:8px;" onclick="fetchRecentLogs()">📋 查詢 1 小時內簽到名單</button>
       <div id="recentLogsContainer" style="display:none;margin-top:10px">
         <div id="recentLogsList" class="log-list"></div>
@@ -179,18 +202,31 @@
   const displayWindow=document.getElementById("displayWindow"),adminPanel=document.getElementById("adminPanel"),adminTargetCard=document.getElementById("adminTargetCard"),cardStatusBadge=document.getElementById("cardStatusBadge"),confirmBox=document.getElementById("confirmBox"),confirmMsg=document.getElementById("confirmMsg"),sectionNewCard=document.getElementById("sectionNewCard"),sectionAddPoints=document.getElementById("sectionAddPoints"),replaceSection=document.getElementById("replaceSection"),idleWarningBox=document.getElementById("idleWarningBox"),idleCountdownSec=document.getElementById("idleCountdownSec");
   
   let ndefController=null,isScanning=!1,isAdminMode=!1,isReplaceMode=!1,currentScannedCardForAdmin="",pendingCardId="",targetReplaceUser=null,autoResetTimer=null,adminIdleTimer=null,adminCountdownInterval=null,countdownSeconds=10,audioCtx=null;
-  let activeCourseInfo=""; // 當前選擇的課程：課程名稱-老師名字
+  let activeCourseInfo="";
 
-  // 頁面載入時先初始化音效與抓取當日課程
   window.addEventListener("DOMContentLoaded", ()=>{
     fetchTodayCourses();
+    initMonthDropdown();
   });
+
+  function initMonthDropdown(){
+    const select = document.getElementById("selectSettlementMonth");
+    const now = new Date();
+    select.innerHTML = "";
+    for(let i=0; i<6; i++){
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const mStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}`;
+      const opt = document.createElement("option");
+      opt.value = mStr;
+      opt.innerText = `${mStr} 紀錄`;
+      select.appendChild(opt);
+    }
+  }
 
   function initAudio(){audioCtx||(audioCtx=new(window.AudioContext||window.webkitAudioContext)),"suspended"===audioCtx.state&&audioCtx.resume()}
   function playSoundSuccess(){if(initAudio(),audioCtx){const t=audioCtx.createOscillator(),e=audioCtx.createGain();t.type="sine",t.frequency.setValueAtTime(880,audioCtx.currentTime),e.gain.setValueAtTime(.3,audioCtx.currentTime),e.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+.25),t.connect(e),e.connect(audioCtx.destination),t.start(),t.stop(audioCtx.currentTime+.25)}}
   function playSoundError(){if(initAudio(),audioCtx){const t=audioCtx.currentTime,e=audioCtx.createOscillator(),n=audioCtx.createGain();e.type="sawtooth",e.frequency.setValueAtTime(220,t),n.gain.setValueAtTime(.3,t),n.gain.exponentialRampToValueAtTime(.01,t+.15),e.connect(n),n.connect(audioCtx.destination),e.start(t),e.stop(t+.15);const o=audioCtx.createOscillator(),a=audioCtx.createGain();o.type="sawtooth",o.frequency.setValueAtTime(180,t+.2),a.gain.setValueAtTime(.3,t+.2),a.gain.exponentialRampToValueAtTime(.01,t+.4),o.connect(a),a.connect(audioCtx.destination),o.start(t+.2),o.stop(t+.4)}}
 
-  // 需求 3：管理者 30 秒閒置重置，包含滑動畫面 touchmove & scroll
   function resetAdminIdleTimer(){
     if(isAdminMode){
       adminIdleTimer&&clearTimeout(adminIdleTimer);
@@ -218,12 +254,10 @@
     },1e3);
   }
 
-  // 綁定滑動、滾動、點擊重置
   ["click","touchstart","touchmove","mousemove","keydown","scroll"].forEach(t=>{
     window.addEventListener(t,()=>{isAdminMode&&resetAdminIdleTimer()},{passive:!0});
   });
 
-  // 需求 1：拉取當日課程並生成滑動開關
   async function fetchTodayCourses(){
     const res = await safeFetch({action: "getTodayCourses"});
     const container = document.getElementById("courseItemsContainer");
@@ -332,7 +366,6 @@
 
   async function processDeduct(t,e=!1){
     confirmBox.style.display="none",setDisplay(`💳 掃描卡號：<b>${t}</b><br>⏳ <b>資料處理中，請勿重複刷卡...</b>`,"theme-loading");
-    // 帶入選擇的課程 info
     const n=await safeFetch({action:"deduct",cardId:t,courseInfo:activeCourseInfo,isForce:e});
     if(n)if("success"===n.status){
       playSoundSuccess();
@@ -445,20 +478,31 @@
     }
   }
 
-  // 需求 6：觸發每月老師課堂人次統計
+  // 需求 2：執行月份結算並於小視窗顯示報告
   async function triggerMonthlySettlement(){
-    if(confirm("確定要執行本月老師課堂人次結算並生成統計表嗎？")){
-      setDisplay("⏳ 正在計算並生成月統計表...","theme-loading");
-      const res = await safeFetch({action: "monthlySettlement"});
+    const targetMonth = document.getElementById("selectSettlementMonth").value;
+    if(confirm(`確定要執行【${targetMonth}】老師課堂人次結算嗎？`)){
+      setDisplay("⏳ 正在計算並生成月統計報告...","theme-loading");
+      const res = await safeFetch({action: "monthlySettlement", targetMonth: targetMonth});
       if(res && res.status === "success"){
         playSoundSuccess();
-        alert(res.message);
         setDisplay(`🎉 <b>結算成功！</b><br>已生成試算表：<b>${res.sheetName}</b>`,"theme-admin");
+        showReportModal(`${targetMonth} 月份結算`, res.reportText);
       } else {
         playSoundError();
         alert(res ? res.message : "結算失敗");
       }
     }
+  }
+
+  function showReportModal(title, text){
+    document.getElementById("reportTitle").innerText = `📊 ${title}`;
+    document.getElementById("reportText").innerText = text || "無打卡數據紀錄。";
+    document.getElementById("reportModal").style.display = "flex";
+  }
+
+  function closeReportModal(){
+    document.getElementById("reportModal").style.display = "none";
   }
 
   function closeAdminPanel(){
