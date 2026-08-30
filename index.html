@@ -16,7 +16,7 @@
     .course-name{font-weight:bold;color:#fff;font-size:15px}
     .course-sub{font-size:12px;color:#aaa}
     
-    .status-display{margin-top:15px;padding:25px;border-radius:16px;font-size:22px;font-weight:700;line-height:1.6;text-align:left;min-height:220px;display:flex;flex-direction:column;justify-content:center;word-break:break-all}
+    .status-display{margin-top:15px;padding:25px;border-radius:16px;font-size:20px;font-weight:700;line-height:1.6;text-align:left;min-height:220px;display:flex;flex-direction:column;justify-content:center;word-break:break-all}
     .theme-standby{background-color:#2a2a2a;color:#aaa;border:2px dashed #555;text-align:center}
     .theme-waiting{background-color:#1a2332;color:#00d2ff;border:3px solid #00d2ff;animation:breathing-glow 2.5s infinite ease-in-out}
     @keyframes breathing-glow{0%,100%{opacity:.5;border-color:rgba(0,210,255,.4);box-shadow:0 0 5px rgba(0,210,255,.2)}50%{opacity:1;border-color:#00d2ff;box-shadow:0 0 20px rgba(0,210,255,.8)}}
@@ -25,11 +25,11 @@
     .theme-success{background-color:#004d20;color:#00ff66;border:3px solid #00ff66}
     .theme-error{background-color:#5a0000;color:#ff4d4d;border:3px solid #ff4d4d}
     .theme-admin{background-color:#4a0072;color:#e040fb;border:3px solid #e040fb}
-    .highlight-val{font-size:32px;font-weight:900;color:#fff;text-decoration:underline}
+    .highlight-val{font-size:28px;font-weight:900;color:#fff}
     .warn-alert{display:inline-block;font-weight:900;color:#ff3333;text-shadow:0 0 10px rgba(255,0,0,.8);animation:blink-animation .8s infinite alternate;background-color:rgba(255,0,0,.2);padding:2px 8px;border-radius:8px}
     @keyframes blink-animation{0%{opacity:1;transform:scale(1)}100%{opacity:.3;transform:scale(1.02)}}
-    .history-box{margin-top:15px;padding-top:12px;border-top:1px solid rgba(255,255,255,.2);font-size:15px;color:#e0e0e0;font-weight:400}
-    .history-title{font-size:16px;font-weight:700;color:#ffeb3b;margin-bottom:6px}
+    .history-box{margin-top:12px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.3);font-size:14px;color:#e0e0e0;font-weight:400}
+    .history-title{font-size:15px;font-weight:700;color:#ffeb3b;margin-bottom:6px}
     .history-item{padding:2px 0;font-family:monospace}
     .confirm-box{display:none;background:#332b00;border:3px solid #ffcc00;padding:20px;border-radius:16px;margin-top:15px;text-align:center}
     .confirm-btn-group{display:flex;gap:12px;margin-top:15px}
@@ -58,10 +58,11 @@
     input:checked+.slider{background-color:#00ff66}
     input:checked+.slider:before{transform:translateX(24px)}
     
-    .idle-warning-box{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);width:90%;max-width:460px;background:#ff0000;color:#fff;padding:15px;border-radius:12px;box-shadow:0 0 25px rgba(255,0,0,1);z-index:9999;text-align:center;font-weight:700;animation:pulse-warn .5s infinite alternate}
-    @keyframes pulse-warn{0%{transform:translateX(-50%) scale(1);background:#ff0000}100%{transform:translateX(-50%) scale(1.04);background:#ff6600}}
+    /* 需求 4：無聲高亮靜音提醒燈箱 */
+    .idle-warning-box{display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);width:90%;max-width:460px;background:#ff007f;color:#fff;padding:15px;border-radius:12px;box-shadow:0 0 30px rgba(255,0,127,1);z-index:9999;text-align:center;font-weight:700;animation:pulse-warn .4s infinite alternate}
+    @keyframes pulse-warn{0%{transform:translateX(-50%) scale(1);background:#ff007f;box-shadow:0 0 20px rgba(255,0,127,.8)}100%{transform:translateX(-50%) scale(1.05);background:#ff6600;box-shadow:0 0 40px rgba(255,102,0,1)}}
 
-    /* 手機月結算彈出報告燈箱（美化表格化） */
+    /* 燈箱視窗樣式 */
     .report-modal{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:10000;justify-content:center;align-items:center;padding:12px}
     .report-content-box{background:#1a1a1a;border:2px solid #00d2ff;border-radius:16px;width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 25px rgba(0,210,255,0.3)}
     .report-header{background:linear-gradient(135deg, #2a2a2a, #111);padding:14px 18px;border-bottom:1px solid #444;display:flex;justify-content:space-between;align-items:center}
@@ -81,20 +82,22 @@
     .report-table td{padding:8px 6px;border-bottom:1px solid #2a2a2a;vertical-align:top}
     .badge-count{background:#00d2ff;color:#000;font-weight:700;padding:2px 6px;border-radius:10px;font-size:12px}
     .student-tag{display:inline-block;background:#333;color:#e0e0e0;padding:2px 6px;border-radius:4px;margin:2px;font-size:12px;border:1px solid #444}
+    .btn-view-students{background:#00b0ff;color:#fff;border:none;padding:8px 12px;border-radius:8px;font-weight:700;font-size:14px;width:100%;margin-top:8px;cursor:pointer;display:none}
   </style>
 </head>
 <body>
 
+<!-- 需求 4：無警報聲高亮提醒視窗 -->
 <div id="idleWarningBox" class="idle-warning-box">
-  ⚠️ 檢測到閒置！系統即將於 <span id="idleCountdownSec" style="font-size:28px;text-decoration:underline">10</span> 秒後自動退出管理者模式！<br>
-  <span style="font-size:14px;opacity:.9">(請滑動或點擊畫面任意處以繼續使用)</span>
+  ⚠️ 檢測到閒置！系統即將於 <span id="idleCountdownSec" style="font-size:32px;text-decoration:underline;color:#fff;">5</span> 秒後自動退出管理者模式！<br>
+  <span style="font-size:14px;opacity:.9">(請點擊或觸碰畫面任意處繼續使用)</span>
 </div>
 
-<!-- 月結算報告彈出視窗 -->
+<!-- 月結算與課程人員彈出視窗 -->
 <div id="reportModal" class="report-modal">
   <div class="report-content-box">
     <div class="report-header">
-      <h4 id="reportTitle">📊 月份結算報告</h4>
+      <h4 id="reportTitle">📊 統計報告</h4>
       <button class="btn-close-modal" onclick="closeReportModal()">關閉</button>
     </div>
     <div id="reportText" class="report-body">載入中...</div>
@@ -112,6 +115,8 @@
     <div id="courseItemsContainer">
       <div style="color:#aaa;text-align:center;padding:10px;">正在讀取當日課程...</div>
     </div>
+    <!-- 需求 1：查看上課人員名單按鈕 -->
+    <button id="btnViewStudents" class="btn-view-students" onclick="fetchCourseStudents()">📋 查看此課程上課人員名單</button>
   </div>
 
   <div id="displayWindow" class="status-display theme-standby">請現場人員先開啟上方欲簽到課程之開關...</div>
@@ -190,7 +195,8 @@
     <div id="sectionAddPoints" class="admin-section" style="display:none">
       <h4>🎟️ 點數儲值與展延</h4>
       <div class="form-group">
-        <label>展延到期日 (預設：剩餘點數×10天 + 100天)：</label>
+        <!-- 需求 2 提示調整 -->
+        <label>展延到期日 (預設：當前到期日+剩餘天數+100天)：</label>
         <input type="date" id="addPointExpiry">
       </div>
       <button class="btn-admin-act" style="background:#00c853;margin-bottom:8px" onclick="submitAddPoints(10)">+ 增加 10 點</button>
@@ -211,17 +217,16 @@
 
 <script>
   const GAS_WEB_APP_URL="https://script.google.com/macros/s/AKfycbxh-0Xq4bF3sPYwwI-H6MjpN2ZjY3Jp1_ZfQN2TBrzNqGPj2P0MjudeHG2DYsQE4oytEg/exec";
-  const displayWindow=document.getElementById("displayWindow"),adminPanel=document.getElementById("adminPanel"),adminTargetCard=document.getElementById("adminTargetCard"),cardStatusBadge=document.getElementById("cardStatusBadge"),confirmBox=document.getElementById("confirmBox"),confirmMsg=document.getElementById("confirmMsg"),sectionNewCard=document.getElementById("sectionNewCard"),sectionAddPoints=document.getElementById("sectionAddPoints"),replaceSection=document.getElementById("replaceSection"),idleWarningBox=document.getElementById("idleWarningBox"),idleCountdownSec=document.getElementById("idleCountdownSec");
+  const displayWindow=document.getElementById("displayWindow"),adminPanel=document.getElementById("adminPanel"),adminTargetCard=document.getElementById("adminTargetCard"),cardStatusBadge=document.getElementById("cardStatusBadge"),confirmBox=document.getElementById("confirmBox"),confirmMsg=document.getElementById("confirmMsg"),sectionNewCard=document.getElementById("sectionNewCard"),sectionAddPoints=document.getElementById("sectionAddPoints"),replaceSection=document.getElementById("replaceSection"),idleWarningBox=document.getElementById("idleWarningBox"),idleCountdownSec=document.getElementById("idleCountdownSec"),btnViewStudents=document.getElementById("btnViewStudents");
   
-  let ndefController=null,isScanning=!1,isAdminMode=!1,isReplaceMode=!1,currentScannedCardForAdmin="",pendingCardId="",targetReplaceUser=null,autoResetTimer=null,adminIdleTimer=null,adminCountdownInterval=null,countdownSeconds=10,audioCtx=null;
-  let activeCourseInfo="";
+  let ndefController=null,isScanning=!1,isAdminMode=!1,isReplaceMode=!1,currentScannedCardForAdmin="",pendingCardId="",targetReplaceUser=null,autoResetTimer=null,adminIdleTimer=null,adminCountdownInterval=null,countdownSeconds=5,audioCtx=null;
+  let activeCourseInfo="",activeCourseName="";
 
   window.addEventListener("DOMContentLoaded", ()=>{
     fetchTodayCourses();
     initMonthDropdown();
   });
 
-  // 自動偵測紀錄月份填入下拉選單
   async function initMonthDropdown(){
     const select = document.getElementById("selectSettlementMonth");
     const res = await safeFetch({action: "getAvailableLogMonths"});
@@ -248,35 +253,39 @@
   function playSoundSuccess(){if(initAudio(),audioCtx){const t=audioCtx.createOscillator(),e=audioCtx.createGain();t.type="sine",t.frequency.setValueAtTime(880,audioCtx.currentTime),e.gain.setValueAtTime(.3,audioCtx.currentTime),e.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+.25),t.connect(e),e.connect(audioCtx.destination),t.start(),t.stop(audioCtx.currentTime+.25)}}
   function playSoundError(){if(initAudio(),audioCtx){const t=audioCtx.currentTime,e=audioCtx.createOscillator(),n=audioCtx.createGain();e.type="sawtooth",e.frequency.setValueAtTime(220,t),n.gain.setValueAtTime(.3,t),n.gain.exponentialRampToValueAtTime(.01,t+.15),e.connect(n),n.connect(audioCtx.destination),e.start(t),e.stop(t+.15);const o=audioCtx.createOscillator(),a=audioCtx.createGain();o.type="sawtooth",o.frequency.setValueAtTime(180,t+.2),a.gain.setValueAtTime(.3,t+.2),a.gain.exponentialRampToValueAtTime(.01,t+.4),o.connect(a),a.connect(audioCtx.destination),o.start(t+.2),o.stop(t+.4)}}
 
+  // 需求 4：管理者超過 20 秒沒觸碰畫面，出現 5 秒提醒高亮畫面，不再有警報聲
   function resetAdminIdleTimer(){
     if(isAdminMode){
       adminIdleTimer&&clearTimeout(adminIdleTimer);
       adminCountdownInterval&&clearInterval(adminCountdownInterval);
       idleWarningBox.style.display="none";
-      adminIdleTimer=setTimeout(()=>{startIdleCountdown()},30e3);
+      adminIdleTimer=setTimeout(()=>{startIdleCountdown()}, 20000); // 20 秒
     }
   }
 
   function startIdleCountdown(){
-    countdownSeconds=10;
+    countdownSeconds=5; // 5 秒提醒
     idleCountdownSec.innerText=countdownSeconds;
     idleWarningBox.style.display="block";
-    playSoundError();
+    // 已徹底移除警報聲 (playSoundError)
     adminCountdownInterval=setInterval(()=>{
       countdownSeconds--;
       idleCountdownSec.innerText=countdownSeconds;
-      playSoundError();
       if(countdownSeconds<=0){
         clearInterval(adminCountdownInterval);
         idleWarningBox.style.display="none";
         closeAdminPanel();
-        alert("⏱️ 管理者模式已超過 40 秒未操作，系統已自動退出！");
+        alert("⏱️ 管理者模式已超過 25 秒未操作，系統已自動退出！");
       }
-    },1e3);
+    },1000);
   }
 
   ["click","touchstart","touchmove","mousemove","keydown","scroll"].forEach(t=>{
-    window.addEventListener(t,()=>{isAdminMode&&resetAdminIdleTimer()},{passive:!0});
+    window.addEventListener(t,()=>{
+      // 若在打卡成功畫面觸碰，清除自動退回計時
+      if(autoResetTimer){ clearTimeout(autoResetTimer); autoResetTimer=null; }
+      isAdminMode&&resetAdminIdleTimer();
+    },{passive:!0});
   });
 
   async function fetchTodayCourses(){
@@ -297,7 +306,7 @@
             <div class="course-sub">👤 老師：${c.teacher} | ⏰ ${c.timeInfo}</div>
           </div>
           <label class="switch">
-            <input type="checkbox" name="courseToggle" class="course-toggle-btn" data-info="${c.courseName}-${c.teacher}" onchange="handleCourseToggle(this)">
+            <input type="checkbox" name="courseToggle" class="course-toggle-btn" data-info="${c.courseName}-${c.teacher}" data-name="${c.courseName}" onchange="handleCourseToggle(this)">
             <span class="slider"></span>
           </label>
         </div>
@@ -307,35 +316,125 @@
     }
   }
 
+  // 需求 1：課程開關打開後在最下面增加查看上課人員名單按鈕
   function handleCourseToggle(targetInput){
     const toggles = document.querySelectorAll(".course-toggle-btn");
     if(targetInput.checked){
       toggles.forEach(input => { if(input !== targetInput) input.checked = false; });
       activeCourseInfo = targetInput.getAttribute("data-info");
+      activeCourseName = targetInput.getAttribute("data-name");
+      btnViewStudents.style.display = "block"; // 顯示按鈕
       setDisplay(`📡 已開啟【${activeCourseInfo}】簽到感應<br>請將卡片靠近手機背面...`, "theme-waiting");
       if(!isScanning) startNfcScan();
     } else {
       activeCourseInfo = "";
+      activeCourseName = "";
+      btnViewStudents.style.display = "none"; // 隱藏按鈕
       stopNfcScan();
       setDisplay("已關閉簽到感應。請現場人員開啟欲簽到課程之開關。", "theme-standby");
     }
   }
 
-  function calcFutureDate(t){const e=new Date;e.setDate(e.getDate()+t);return[e.getFullYear(),(""+(e.getMonth()+1)).padStart(2,"0"),(""+e.getDate()).padStart(2,"0")].join("-")}
-  function calcRechargeExpiry(t){return calcFutureDate(10*(Number(t)||0)+100)}
+  // 需求 1：向後端獲取並彈窗顯示該課程上課人員
+  async function fetchCourseStudents(){
+    if(!activeCourseName) return alert("請先開啟課程開關！");
+    setDisplay("⏳ 正在讀取學員名單...","theme-loading");
+    const res = await safeFetch({action: "getCourseStudents", courseName: activeCourseName});
+    if(res && res.status === "success"){
+      showStudentListModal(activeCourseName, res.students);
+      setDisplay(`📡 已開啟【${activeCourseInfo}】簽到感應<br>請將卡片靠近手機背面...`, "theme-waiting");
+    } else {
+      alert(res ? res.message : "讀取學員名單失敗");
+    }
+  }
+
+  function showStudentListModal(courseName, students){
+    document.getElementById("reportTitle").innerHTML = `📋 【${courseName}】上課人員`;
+    const reportBody = document.getElementById("reportText");
+    
+    if (!students || students.length === 0) {
+      reportBody.innerHTML = `<div style="text-align:center;padding:30px;color:#aaa;">⚠️ 目前尚無報名學員（體驗學員僅顯示今日預約）</div>`;
+      document.getElementById("reportModal").style.display = "flex";
+      return;
+    }
+
+    let rowsHtml = students.map((s, idx) => `
+      <tr>
+        <td style="text-align:center;">${idx+1}</td>
+        <td><b>${s.name}</b></td>
+        <td><a href="tel:${s.phone}" style="color:#00d2ff;">${s.phone}</a></td>
+        <td><span class="student-tag" style="${s.isTrial ? 'background:#ff9800;color:#fff;' : 'background:#00c853;color:#fff;'}">${s.type}</span></td>
+      </tr>
+    `).join("");
+
+    reportBody.innerHTML = `
+      <div style="margin-bottom:10px;font-size:14px;color:#00d2ff;">👥 總上課人數：<b>${students.length}</b> 人</div>
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th style="width:12%;text-align:center;">#</th>
+            <th style="width:30%;">姓名</th>
+            <th style="width:38%;">電話</th>
+            <th style="width:20%;">屬性</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    `;
+    document.getElementById("reportModal").style.display = "flex";
+  }
+
+  function calcFutureDate(days){
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return [d.getFullYear(), (""+(d.getMonth()+1)).padStart(2,"0"), (""+d.getDate()).padStart(2,"0")].join("-");
+  }
+
+  // 需求 2：預設延後日期 = 之前當日+剩餘天數+100天 (過期則依今日+100天)
+  function calcRechargeExpiry(rawExpiryStr){
+    const now = new Date();
+    now.setHours(0,0,0,0);
+    let remDays = 0;
+    if(rawExpiryStr){
+      const exp = new Date(rawExpiryStr);
+      if(!isNaN(exp.getTime())){
+        remDays = Math.ceil((exp - now)/(1000*60*60*24));
+      }
+    }
+    if(remDays < 0) remDays = 0; // 若過期則以 0 計算
+    return calcFutureDate(remDays + 100);
+  }
+
   function setDisplay(t,e){displayWindow.className=`status-display ${e}`,displayWindow.innerHTML=t}
-  function maskName(t){if(!t)return"";const e=Array.from(t);return e.length>1&&(e[1]="♥"),e.join("")}
-  function resetAutoResetTimer(){autoResetTimer&&clearTimeout(autoResetTimer),isAdminMode||(autoResetTimer=setTimeout((()=>{confirmBox.style.display="none",pendingCardId="",isScanning?setDisplay(`📡 已開啟【${activeCourseInfo}】簽到感應<br>請將卡片靠近手機背面...`,"theme-waiting"):setDisplay("請現場人員先開啟上方欲簽到課程之開關...","theme-standby")}),30e3))}
+  
+  // 需求 5：打卡完畢卡片狀態畫面若沒觸碰畫面則在 3 秒內退回等待刷卡畫面
+  function resetAutoResetTimer(timeoutMs = 3000){
+    autoResetTimer&&clearTimeout(autoResetTimer);
+    if(!isAdminMode){
+      autoResetTimer=setTimeout(()=>{
+        confirmBox.style.display="none";
+        pendingCardId="";
+        if(isScanning){
+          setDisplay(`📡 已開啟【${activeCourseInfo}】簽到感應<br>請將卡片靠近手機背面...`,"theme-waiting");
+        } else {
+          setDisplay("請現場人員先開啟上方欲簽到課程之開關...","theme-standby");
+        }
+      }, timeoutMs);
+    }
+  }
 
   function pauseNfcScan(){ndefController&&(ndefController.abort(),ndefController=null)}
-  function resumeNfcScanWithCooldown(t=2e3){autoResetTimer&&clearTimeout(autoResetTimer),resetAutoResetTimer();const e=isAdminMode||isReplaceMode?500:t;setTimeout((()=>{isScanning&&!ndefController&&restartNfcListener()}),e)}
+  function resumeNfcScanWithCooldown(t=2000){
+    const e=isAdminMode||isReplaceMode?500:t;
+    setTimeout((()=>{isScanning&&!ndefController&&restartNfcListener()}),e)
+  }
 
   async function restartNfcListener(){
     try{
       ndefController=new AbortController;
       const t=new NDEFReader;
       await t.scan({signal:ndefController.signal});
-      t.addEventListener("readingerror",(()=>{pauseNfcScan(),setDisplay("❌ 讀取失敗，請重新靠卡一次","theme-error"),playSoundError(),resumeNfcScanWithCooldown(3e3)}));
+      t.addEventListener("readingerror",(()=>{pauseNfcScan(),setDisplay("❌ 讀取失敗，請重新靠卡一次","theme-error"),playSoundError(),resumeNfcScanWithCooldown(3000)}));
       t.addEventListener("reading",(async({serialNumber:t})=>{
         if(pauseNfcScan(),cardId=t.replace(/:/g,"").toUpperCase(),isAdminMode){
           if(resetAdminIdleTimer(),currentScannedCardForAdmin=cardId,adminTargetCard.innerText=cardId,document.getElementById("toggleDeleteUnlock").checked=!1,document.getElementById("btnDeleteCard").style.display="none",isReplaceMode)return document.getElementById("newCardDisplay").innerText=cardId,playSoundSuccess(),void resumeNfcScanWithCooldown(500);
@@ -345,14 +444,20 @@
             if(!t)return void resumeNfcScanWithCooldown(500);
             if("exists"===t.status){
               sectionNewCard.style.display="none",sectionAddPoints.style.display="block";
-              const e=calcRechargeExpiry(t.points);
-              document.getElementById("addPointExpiry").value=e,cardStatusBadge.innerText=`⚠️ 既有學員：${t.name}（剩餘 ${t.points} 點，原到期日 ${t.expiryDate||"無"}）`;
+              // 需求 2：動態計算延後日期
+              const e=calcRechargeExpiry(t.expiryDate);
+              document.getElementById("addPointExpiry").value=e;
+              
+              // 需求 3：狀態欄顯示鎖卡狀態
+              let isLockedHint = t.isLocked ? " <span style='color:#ff4d4d;'>(⚠️ 已鎖卡)</span>" : "";
+              cardStatusBadge.innerHTML=`⚠️ 既有學員：${t.name}（剩餘 ${t.points} 點，原到期日 ${t.expiryDate||"無"}）${isLockedHint}`;
+              
               let n="";
               n=t.logsAfterRecharge&&t.logsAfterRecharge.length>0?t.logsAfterRecharge.map((t=>`<div class="history-item">🕒 ${t.time} <span style="color:#00ff66;">(剩 ${t.remainingPoints} 點)</span></div>`)).join(""):`<div class="history-item" style="color:#aaa;">儲值後尚無進場打卡紀錄</div>`,setDisplay(`
                 <div style="text-align: center;">
                   姓名：<b>${t.name}</b><br>
                   點數：<b>${t.points}</b> 點<br>
-                  使用期限：${t.expiryDate||"無期限"}
+                  使用期限：${t.expiryDate||"無期限"}${t.isLocked ? " (已鎖卡)" : ""}
                 </div>
                 <div class="history-box" style="margin-top:15px; text-align:left; max-height:160px; overflow-y:auto;">
                   <div class="history-title" style="color:#00d2ff;">💰 最近一次儲值/開卡時間：</div>
@@ -390,33 +495,35 @@
     const n=await safeFetch({action:"deduct",cardId:t,courseInfo:activeCourseInfo,isForce:e});
     if(n)if("success"===n.status){
       playSoundSuccess();
-      let e=`<span class="highlight-val">${n.remainingPoints}</span> 次`;
-      n.remainingPoints<=3&&(e=`<span class="warn-alert">${n.remainingPoints} 次 ⚠️ 點數即將用完！</span>`);
-      let o=`<span class="highlight-val">${n.expiryDate}</span>`;
-      if(n.expiryDate&&"無期限"!==n.expiryDate){
-        const t=new Date;t.setHours(0,0,0,0);
-        const e=new Date(n.expiryDate),s=Math.ceil((e-t)/864e5);
-        if(s<10){const t=s<=0?"已過期！":`剩 ${s} 天`;o=`<span class="warn-alert">${n.expiryDate} (${t})</span>`}
+      
+      // 需求 6：去除多餘文字，精簡卡片狀態畫面
+      let logsHtml = "";
+      if(n.logsAfterRecharge && n.logsAfterRecharge.length > 0){
+        logsHtml = n.logsAfterRecharge.map(item => `<div class="history-item">${item.time}</div>`).join("");
+      } else {
+        logsHtml = `<div class="history-item" style="color:#aaa;">無紀錄</div>`;
       }
-      let s="";
-      if(n.recent5Logs&&n.recent5Logs.length>0){
-        const t=n.recent5Logs.map((t=>`<div class="history-item">🕒 ${t}</div>`)).join("");
-        s=`<div class="history-box"><div class="history-title">📅 最近 5 次打卡紀錄：</div>${t}</div>`
-      }
-      const a=maskName(n.name);
+
       setDisplay(`
-        <div style="font-size:26px; color:#00ff66; text-align:center; margin-bottom:10px;">🎉 報到成功</div>
-        <div style="font-size:24px; text-align:center; color:#00d2ff; margin-bottom:5px;">📖 課程：${n.courseInfo||"一般打卡"}</div>
-        <div style="font-size:32px; text-align:center; margin-bottom:15px; color:#fff;">${a}</div>
-        🎟️ 剩餘點數：${e}<br>
-        📅 使用期限：${o}
-        ${s}
-      `,"theme-success");
+        <div style="font-size:26px; color:#00ff66; text-align:center; margin-bottom:8px; font-weight:900;">打卡成功!</div>
+        <div style="font-size:20px; text-align:center; color:#00d2ff; margin-bottom:4px;">${n.courseNameOnly || activeCourseName}</div>
+        <div style="font-size:28px; text-align:center; margin-bottom:12px; color:#fff; font-weight:bold;">${n.name}</div>
+        <div style="font-size:16px; color:#fff; margin-bottom:4px;">點數 <span class="highlight-val">${n.remainingPoints}</span> 點</div>
+        <div style="font-size:16px; color:#fff; margin-bottom:8px;">使用期限<br><span style="font-size:20px; font-weight:bold; color:#00ff66;">${n.expiryDate}</span></div>
+        <div class="history-box">
+          <div class="history-title">儲值(開卡)後打卡紀錄</div>
+          ${logsHtml}
+        </div>
+      `, "theme-success");
+
+      // 需求 5：3 秒內退回等待刷卡畫面
+      resetAutoResetTimer(3000);
+
     }else"need_confirm"===n.status?(playSoundError(),pendingCardId=t,confirmMsg.innerHTML=n.message,confirmBox.style.display="block",setDisplay("⚠️ <b>請於下方選擇是否繼續扣點</b>","theme-admin")):"admin"===n.status?(playSoundSuccess(),isAdminMode=!0,resetAdminIdleTimer(),autoResetTimer&&clearTimeout(autoResetTimer),currentScannedCardForAdmin="",adminTargetCard.innerText="請靠卡...",cardStatusBadge.innerText="",sectionNewCard.style.display="none",sectionAddPoints.style.display="none",setDisplay("👑 <b>管理者解鎖！</b><br>已進入管理者模式，<b>簽到扣款已暫停</b>。<br>請感應欲處理的會員卡號。","theme-admin"),adminPanel.style.display="block",initMonthDropdown()):(playSoundError(),setDisplay(`❌ <b>打卡失敗：</b><br>${n.message}<br><br>💳 卡號：${t}`,"theme-error"));
-    resumeNfcScanWithCooldown(2e3);
+    resumeNfcScanWithCooldown(2000);
   }
 
-  document.getElementById("btnConfirmYes").addEventListener("click",(()=>{pendingCardId&&(processDeduct(pendingCardId,!0),pendingCardId="")})),document.getElementById("btnConfirmNo").addEventListener("click",(()=>{pendingCardId="",confirmBox.style.display="none",setDisplay("已取消重複扣點。請重新靠卡打卡。","theme-standby"),resumeNfcScanWithCooldown(1e3)}));
+  document.getElementById("btnConfirmYes").addEventListener("click",(()=>{pendingCardId&&(processDeduct(pendingCardId,!0),pendingCardId="")})),document.getElementById("btnConfirmNo").addEventListener("click",(()=>{pendingCardId="",confirmBox.style.display="none",setDisplay("已取消重複扣點。請重新靠卡打卡。","theme-standby"),resumeNfcScanWithCooldown(1000)}));
 
   function stopNfcScan(){autoResetTimer&&clearTimeout(autoResetTimer),pauseNfcScan(),isScanning=!1,isAdminMode||setDisplay("請現場人員先開啟上方欲簽到課程之開關...","theme-standby")}
   function toggleReplaceMode(){(isReplaceMode=!isReplaceMode)?(replaceSection.style.display="block",sectionNewCard.style.display="none",sectionAddPoints.style.display="none",setDisplay("🔄 <b>已切換至卡片遺失換卡模式</b><br>請先感應「全新卡片」，再輸入舊學員姓名搜尋。","theme-admin")):(replaceSection.style.display="none",targetReplaceUser=null,setDisplay("已離開換卡模式。","theme-admin"))}
@@ -499,7 +606,6 @@
     }
   }
 
-  // 執行月份結算並於小視窗顯示美化表格
   async function triggerMonthlySettlement(){
     const targetMonth = document.getElementById("selectSettlementMonth").value;
     if(!targetMonth) return alert("請先選擇要結算的月份！");
@@ -517,7 +623,6 @@
     }
   }
 
-  // 渲染表格化美化彈窗
   function showReportModal(title, stats){
     document.getElementById("reportTitle").innerHTML = `📊 ${title}`;
     const reportBody = document.getElementById("reportText");
@@ -609,7 +714,7 @@
   }
 
   function closeAdminPanel(){
-    isAdminMode=!1,isReplaceMode=!1,currentScannedCardForAdmin="",adminIdleTimer&&clearTimeout(adminIdleTimer),adminCountdownInterval&&clearInterval(adminCountdownInterval),idleWarningBox.style.display="none",document.getElementById("toggleDeleteUnlock").checked=!1,document.getElementById("btnDeleteCard").style.display="none",adminPanel.style.display="none",replaceSection.style.display="none",document.getElementById("recentLogsContainer").style.display="none",setDisplay("已退出管理者模式，恢復簽到打卡系統。","theme-standby"),resumeNfcScanWithCooldown(1e3)
+    isAdminMode=!1,isReplaceMode=!1,currentScannedCardForAdmin="",adminIdleTimer&&clearTimeout(adminIdleTimer),adminCountdownInterval&&clearInterval(adminCountdownInterval),idleWarningBox.style.display="none",document.getElementById("toggleDeleteUnlock").checked=!1,document.getElementById("btnDeleteCard").style.display="none",adminPanel.style.display="none",replaceSection.style.display="none",document.getElementById("recentLogsContainer").style.display="none",setDisplay("已退出管理者模式，恢復簽到打卡系統。","theme-standby"),resumeNfcScanWithCooldown(1000)
   }
 </script>
 </body>
