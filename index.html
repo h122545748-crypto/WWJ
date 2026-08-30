@@ -26,8 +26,21 @@
     .theme-error{background-color:#5a0000;color:#ff4d4d;border:3px solid #ff4d4d}
     .theme-admin{background-color:#4a0072;color:#e040fb;border:3px solid #e040fb}
     .highlight-val{font-size:28px;font-weight:900;color:#fff}
-    .warn-alert{display:inline-block;font-weight:900;color:#ff3333;text-shadow:0 0 10px rgba(255,0,0,.8);animation:blink-animation .8s infinite alternate;background-color:rgba(255,0,0,.2);padding:2px 8px;border-radius:8px}
-    @keyframes blink-animation{0%{opacity:1;transform:scale(1)}100%{opacity:.3;transform:scale(1.02)}}
+
+    /* 紅色閃爍打卡勾勾圖示樣式 */
+    .check-icon-blink {
+      color: #ff3333;
+      font-weight: 900;
+      margin-right: 4px;
+      display: inline-block;
+      animation: blink-check 0.8s infinite alternate;
+      text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+    }
+    @keyframes blink-check {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0.2; transform: scale(1.15); }
+    }
+
     .history-box{margin-top:12px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.3);font-size:14px;color:#e0e0e0;font-weight:400}
     .history-title{font-size:15px;font-weight:700;color:#ffeb3b;margin-bottom:6px}
     .history-item{padding:2px 0;font-family:monospace}
@@ -127,7 +140,6 @@
     <p style="font-size:16px;color:#fff;margin-bottom:5px">當前感應卡號：<b id="adminTargetCard" style="color:#00d2ff;font-size:20px">請靠卡...</b></p>
     <p id="cardStatusBadge" style="font-size:14px;color:#ffeb3b;font-weight:700;margin-top:0"></p>
 
-    <!-- 已將【查看上課人員名單】按鈕移至管理者控制台內 -->
     <button id="btnViewStudents" class="btn-view-students" onclick="fetchCourseStudents()">📋 查看此課程上課人員名單</button>
 
     <div class="admin-section">
@@ -314,16 +326,15 @@
       activeCourseInfo = targetInput.getAttribute("data-info");
       activeCourseName = targetInput.getAttribute("data-name");
       
-      // 更新按鈕文字，讓管理者明確知道點擊會顯示哪一門課程
       btnViewStudents.innerText = `📋 查看【${activeCourseName}】上課人員名單`;
-      btnViewStudents.style.display = "block"; // 當開關打開時顯示按鈕
+      btnViewStudents.style.display = "block";
       
       setDisplay(`📡 已開啟【${activeCourseInfo}】簽到感應<br>請將卡片靠近手機背面...`, "theme-waiting");
       if(!isScanning) startNfcScan();
     } else {
       activeCourseInfo = "";
       activeCourseName = "";
-      btnViewStudents.style.display = "none"; // 關閉開關時隱藏按鈕
+      btnViewStudents.style.display = "none";
       stopNfcScan();
       setDisplay("已關閉簽到感應。請現場人員開啟欲簽到課程之開關。", "theme-standby");
     }
@@ -346,22 +357,26 @@
     const reportBody = document.getElementById("reportText");
     
     if (!students || students.length === 0) {
-      reportBody.innerHTML = `<div style="text-align:center;padding:30px;color:#aaa;">⚠️ 目前尚無報名學員（體驗學員僅顯示今日預約）</div>`;
+      reportBody.innerHTML = `<div style="text-align:center;padding:30px;color:#aaa;">⚠️ 目前尚無預約或簽到學員</div>`;
       document.getElementById("reportModal").style.display = "flex";
       return;
     }
 
-    let rowsHtml = students.map((s, idx) => `
-      <tr>
-        <td style="text-align:center;">${idx+1}</td>
-        <td><b>${s.name}</b></td>
-        <td><a href="tel:${s.phone}" style="color:#00d2ff;">${s.phone}</a></td>
-        <td><span class="student-tag" style="${s.isTrial ? 'background:#ff9800;color:#fff;' : 'background:#00c853;color:#fff;'}">${s.type}</span></td>
-      </tr>
-    `).join("");
+    let rowsHtml = students.map((s, idx) => {
+      // 若已簽到，在前方呈現閃爍紅色勾勾
+      const checkMark = s.isCheckedIn ? `<span class="check-icon-blink">✔︎</span>` : ``;
+      return `
+        <tr>
+          <td style="text-align:center;">${idx+1}</td>
+          <td>${checkMark}<b>${s.name}</b></td>
+          <td><a href="tel:${s.phone}" style="color:#00d2ff;">${s.phone || "無"}</a></td>
+          <td><span class="student-tag" style="${s.isWalkIn ? 'background:#d32f2f;color:#fff;' : (s.isTrial ? 'background:#ff9800;color:#fff;' : 'background:#00c853;color:#fff;')}">${s.type}</span></td>
+        </tr>
+      `;
+    }).join("");
 
     reportBody.innerHTML = `
-      <div style="margin-bottom:10px;font-size:14px;color:#00d2ff;">👥 總上課人數：<b>${students.length}</b> 人</div>
+      <div style="margin-bottom:10px;font-size:14px;color:#00d2ff;">👥 應到/已到總人數：<b>${students.length}</b> 人</div>
       <table class="report-table">
         <thead>
           <tr>
