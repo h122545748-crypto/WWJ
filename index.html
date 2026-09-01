@@ -27,7 +27,6 @@
     .theme-admin{background-color:#4a0072;color:#e040fb;border:3px solid #e040fb}
     .highlight-val{font-size:28px;font-weight:900;color:#fff}
 
-    /* 紅色閃爍打卡勾勾圖示樣式 */
     .check-icon-blink {
       color: #ff3333;
       font-weight: 900;
@@ -255,6 +254,24 @@
     }
   }
 
+  function closeReportModal(){
+    document.getElementById("reportModal").style.display = "none";
+  }
+
+  function closeAdminPanel(){
+    isAdminMode = !1;
+    adminIdleTimer && clearTimeout(adminIdleTimer);
+    adminCountdownInterval && clearInterval(adminCountdownInterval);
+    idleWarningBox.style.display = "none";
+    adminPanel.style.display = "none";
+    currentScannedCardForAdmin = "";
+    if(isScanning){
+      setDisplay(`📡 已開啟【${activeCourseInfo}】簽到感應<br>請將卡片靠近手機背面...`, "theme-waiting");
+    } else {
+      setDisplay("請現場人員先開啟上方欲簽到課程之開關...", "theme-standby");
+    }
+  }
+
   function initAudio(){audioCtx||(audioCtx=new(window.AudioContext||window.webkitAudioContext)),"suspended"===audioCtx.state&&audioCtx.resume()}
   function playSoundSuccess(){if(initAudio(),audioCtx){const t=audioCtx.createOscillator(),e=audioCtx.createGain();t.type="sine",t.frequency.setValueAtTime(880,audioCtx.currentTime),e.gain.setValueAtTime(.3,audioCtx.currentTime),e.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+.25),t.connect(e),e.connect(audioCtx.destination),t.start(),t.stop(audioCtx.currentTime+.25)}}
   function playSoundError(){if(initAudio(),audioCtx){const t=audioCtx.currentTime,e=audioCtx.createOscillator(),n=audioCtx.createGain();e.type="sawtooth",e.frequency.setValueAtTime(220,t),n.gain.setValueAtTime(.3,t),n.gain.exponentialRampToValueAtTime(.01,t+.15),e.connect(n),n.connect(audioCtx.destination),e.start(t),e.stop(t+.15);const o=audioCtx.createOscillator(),a=audioCtx.createGain();o.type="sawtooth",o.frequency.setValueAtTime(180,t+.2),a.gain.setValueAtTime(.3,t+.2),a.gain.exponentialRampToValueAtTime(.01,t+.4),o.connect(a),a.connect(audioCtx.destination),o.start(t+.2),o.stop(t+.4)}}
@@ -363,7 +380,6 @@
     }
 
     let rowsHtml = students.map((s, idx) => {
-      // 若已簽到，在前方呈現閃爍紅色勾勾
       const checkMark = s.isCheckedIn ? `<span class="check-icon-blink">✔︎</span>` : ``;
       return `
         <tr>
@@ -389,6 +405,88 @@
         <tbody>${rowsHtml}</tbody>
       </table>
     `;
+    document.getElementById("reportModal").style.display = "flex";
+  }
+
+  async function triggerMonthlySettlement(){
+    const monthVal = document.getElementById("selectSettlementMonth").value;
+    if(!monthVal) return alert("請選擇要結算的月份！");
+    
+    setDisplay("⏳ 正在計算月份數據...","theme-loading");
+    const res = await safeFetch({action: "monthlySettlement", targetMonth: monthVal});
+    
+    if(res && res.status === "success"){
+      showSettlementReportModal(res.sheetName, res.statsData);
+      setDisplay("👑 <b>管理者控制台</b><br>月份結算已完成。","theme-admin");
+    } else {
+      alert(res ? res.message : "結算失敗");
+      setDisplay("👑 <b>管理者控制台</b>","theme-admin");
+    }
+  }
+
+  function showSettlementReportModal(sheetName, stats){
+    document.getElementById("reportTitle").innerHTML = `📊 ${sheetName}`;
+    const reportBody = document.getElementById("reportText");
+    
+    let totalClasses = 0, totalPeople = 0;
+    let htmlContent = "";
+
+    for(const teacher in stats){
+      let teacherHtml = "";
+      for(const course in stats[teacher]){
+        for(const dStr in stats[teacher][course]){
+          const students = stats[teacher][course][dStr];
+          totalClasses++;
+          totalPeople += students.length;
+          teacherHtml += `
+            <tr>
+              <td><b>${course}</b></td>
+              <td>${dStr}</td>
+              <td><span class="badge-count">${students.length} 人</span></td>
+              <td>${students.map(n => `<span class="student-tag">${n}</span>`).join("")}</td>
+            </tr>
+          `;
+        }
+      }
+
+      htmlContent += `
+        <div class="teacher-section">
+          <div class="teacher-head">
+            <span>👤 授課老師：${teacher}</span>
+          </div>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th style="width:25%;">課程</th>
+                <th style="width:18%;">日期</th>
+                <th style="width:17%;">人次</th>
+                <th style="width:40%;">簽到名單</th>
+              </tr>
+            </thead>
+            <tbody>${teacherHtml}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    if(totalClasses === 0){
+      reportBody.innerHTML = `<div style="text-align:center;padding:30px;color:#aaa;">⚠️ 該月份無任何打卡扣點紀錄</div>`;
+    } else {
+      reportBody.innerHTML = `
+        <div class="summary-card">
+          <div class="summary-item">
+            <div class="num">${totalClasses}</div>
+            <div class="label">總開課堂數</div>
+          </div>
+          <div class="summary-item">
+            <div class="num">${totalPeople}</div>
+            <div class="label">總上課人次</div>
+          </div>
+        </div>
+        ${htmlContent}
+      `;
+    }
+
     document.getElementById("reportModal").style.display = "flex";
   }
 
@@ -457,7 +555,7 @@
               cardStatusBadge.innerHTML=`⚠️ 既有學員：${t.name}（剩餘 ${t.points} 點，原到期日 ${t.expiryDate||"無"}）${isLockedHint}`;
               
               let n="";
-              n=t.logsAfterRecharge&&t.logsAfterRecharge.length>0?t.logsAfterRecharge.map((t=>`<div class="history-item">🕒 ${t.time} <span style="color:#00ff66;">(剩 ${t.remainingPoints} 點)</span></div>`)).join(""):`<div class="history-item" style="color:#aaa;">儲值後尚無進場打卡紀錄</div>`,setDisplay(`
+              n=t.logsAfterRecharge&&t.logsAfterRecharge.length>0?t.logsAfterRecharge.map((t=>`<div class="history-item">🕒 ${t.time}</div>`)).join(""):`<div class="history-item" style="color:#aaa;">儲值後尚無進場打卡紀錄</div>`,setDisplay(`
                 <div style="text-align: center;">
                   姓名：<b>${t.name}</b><br>
                   點數：<b>${t.points}</b> 點<br>
@@ -466,7 +564,7 @@
                 <div class="history-box" style="margin-top:15px; text-align:left; max-height:160px; overflow-y:auto;">
                   <div class="history-title" style="color:#00d2ff;">💰 最近一次儲值/開卡時間：</div>
                   <div class="history-item" style="margin-bottom:8px; font-weight:bold;">${t.lastRechargeTime}</div>
-                  <div class="history-title" style="color:#ffeb3b;">📌 儲值後進場打卡紀錄：</div>
+                  <div class="history-title" style="color:#ffeb3b;">📌 儲值(開卡)後打卡紀錄:</div>
                   ${n}
                 </div>
               `,"theme-admin"),playSoundSuccess()
@@ -514,7 +612,7 @@
         <div style="font-size:16px; color:#fff; margin-bottom:4px;">點數 <span class="highlight-val">${n.remainingPoints}</span> 點</div>
         <div style="font-size:16px; color:#fff; margin-bottom:8px;">使用期限<br><span style="font-size:20px; font-weight:bold; color:#00ff66;">${n.expiryDate}</span></div>
         <div class="history-box">
-          <div class="history-title">儲值(開卡)後打卡紀錄</div>
+          <div class="history-title">儲值(開卡)後打卡紀錄:</div>
           ${logsHtml}
         </div>
       `, "theme-success");
@@ -600,123 +698,12 @@
     })).join("")):playSoundError()
   }
 
-  async function cancelCheckIn(t,e,n){
-    if(confirm(`確定要幫學員【${e}】取消於 ${n} 的簽到，並退回 1 點嗎？`)){
-      setDisplay("⏳ 正在辦理取消簽到退點...","theme-loading");
-      const o=await safeFetch({action:"cancelCheckIn",cardId:t,name:e,logTimeStr:n,courseInfo:activeCourseInfo});
-      o&&"success"===o.status?(playSoundSuccess(),alert(o.message),fetchRecentLogs(),setDisplay(`🎉 <b>已成功取消簽到！</b><br>學員：<b>${e}</b><br>已退回 1 點，目前剩餘：<b>${o.newPoints}</b> 點。`,"theme-admin")):(playSoundError(),alert(o?o.message:"取消簽到失敗"))
+  async function cancelCheckIn(t,e,lTime){
+    if(confirm(`確定要為【${e}】取消於 ${lTime} 的簽到並退回 1 點嗎？`)){
+      setDisplay("⏳ 取消簽到中...","theme-loading");
+      const n=await safeFetch({action:"cancelCheckIn",cardId:t,name:e,logTimeStr:lTime,courseInfo:activeCourseInfo});
+      n&&"success"===n.status?(playSoundSuccess(),alert(n.message),fetchRecentLogs(),setDisplay("👑 <b>已成功取消簽到退點！</b>","theme-admin")):(playSoundError(),alert(n?n.message:"取消簽到失敗"))
     }
-  }
-
-  async function triggerMonthlySettlement(){
-    const targetMonth = document.getElementById("selectSettlementMonth").value;
-    if(!targetMonth) return alert("請先選擇要結算的月份！");
-    if(confirm(`確定要執行【${targetMonth}】老師課堂人次結算嗎？`)){
-      setDisplay("⏳ 正在計算並生成月統計報告...","theme-loading");
-      const res = await safeFetch({action: "monthlySettlement", targetMonth: targetMonth});
-      if(res && res.status === "success"){
-        playSoundSuccess();
-        setDisplay(`🎉 <b>結算成功！</b><br>已生成試算表：<b>${res.sheetName}</b>`,"theme-admin");
-        showReportModal(`${targetMonth} 月份結算`, res.statsData);
-      } else {
-        playSoundError();
-        alert(res ? res.message : "結算失敗");
-      }
-    }
-  }
-
-  function showReportModal(title, stats){
-    document.getElementById("reportTitle").innerHTML = `📊 ${title}`;
-    const reportBody = document.getElementById("reportText");
-    
-    if (!stats || Object.keys(stats).length === 0) {
-      reportBody.innerHTML = `<div style="text-align:center;padding:30px;color:#aaa;">⚠️ 該月份尚無任何有效的簽到扣點紀錄</div>`;
-      document.getElementById("reportModal").style.display = "flex";
-      return;
-    }
-
-    let totalAttendance = 0;
-    let totalClasses = 0;
-    let html = "";
-
-    for (const teacher in stats) {
-      let teacherCount = 0;
-      let teacherRowsHtml = "";
-
-      for (const course in stats[teacher]) {
-        const sortedDates = Object.keys(stats[teacher][course]).sort((a,b) => {
-          const pA = a.split("/").map(Number);
-          const pB = b.split("/").map(Number);
-          return (pA[0] * 31 + pA[1]) - (pB[0] * 31 + pB[1]);
-        });
-
-        for (const dStr of sortedDates) {
-          const students = stats[teacher][course][dStr];
-          const count = students.length;
-          totalAttendance += count;
-          teacherCount += count;
-          totalClasses++;
-
-          const studentBadges = students.map(s => `<span class="student-tag">${s}</span>`).join("");
-
-          teacherRowsHtml += `
-            <tr>
-              <td>
-                <div style="font-weight:bold;color:#fff;">${course}</div>
-                <div style="font-size:11px;color:#00d2ff;">📅 ${dStr}</div>
-              </td>
-              <td style="text-align:center;"><span class="badge-count">${count}人</span></td>
-              <td>${studentBadges}</td>
-            </tr>
-          `;
-        }
-      }
-
-      html += `
-        <div class="teacher-section">
-          <div class="teacher-head">
-            <span>👤 授課老師：${teacher}</span>
-            <span>小計：${teacherCount} 人次</span>
-          </div>
-          <table class="report-table">
-            <thead>
-              <tr>
-                <th style="width:35%;">課程/日期</th>
-                <th style="width:20%;text-align:center;">人次</th>
-                <th style="width:45%;">學員名單</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${teacherRowsHtml}
-            </tbody>
-          </table>
-        </div>
-      `;
-    }
-
-    const summaryHtml = `
-      <div class="summary-card">
-        <div class="summary-item">
-          <div class="num">${totalAttendance}</div>
-          <div class="label">本月總上課人次</div>
-        </div>
-        <div class="summary-item">
-          <div class="num" style="color:#00d2ff;">${totalClasses}</div>
-          <div class="label">總開課堂數</div>
-        </div>
-      </div>
-    `;
-
-    reportBody.innerHTML = summaryHtml + html;
-    document.getElementById("reportModal").style.display = "flex";
-  }
-
-  function closeReportModal(){
-    document.getElementById("reportModal").style.display = "none";
-  }
-
-  function closeAdminPanel(){
-    isAdminMode=!1,isReplaceMode=!1,currentScannedCardForAdmin="",adminIdleTimer&&clearTimeout(adminIdleTimer),adminCountdownInterval&&clearInterval(adminCountdownInterval),idleWarningBox.style.display="none",document.getElementById("toggleDeleteUnlock").checked=!1,document.getElementById("btnDeleteCard").style.display="none",adminPanel.style.display="none",replaceSection.style.display="none",document.getElementById("recentLogsContainer").style.display="none",setDisplay("已退出管理者模式，恢復簽到打卡系統。","theme-standby"),resumeNfcScanWithCooldown(1000)
   }
 </script>
 </body>
